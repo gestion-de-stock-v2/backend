@@ -1,6 +1,8 @@
 /* ============================================================
-   PROFILE — Container
+   PROFILE — SANS ROUGE
+   Blanc #FFFFFF  |  Bleu #1E3A8A  |  Noir #111827  |  Orange #F97316
    ============================================================ */
+
 .profile-page {
   display: flex;
   flex-direction: column;
@@ -10,16 +12,17 @@
 }
 
 /* ============================================================
-   PROFILE — En-tête (avatar + infos)
+   EN-TÊTE — avatar + infos
    ============================================================ */
 .profile-header {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: #FFFFFF;
   padding: 2rem;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,.06);
+  box-shadow: 0 4px 20px rgba(17, 24, 39, .08);
+  border-left: 4px solid #1E3A8A;
   position: relative;
   overflow: hidden;
 }
@@ -32,7 +35,7 @@
   width: 300px;
   height: 300px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(59,130,246,.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(30, 58, 138, .10) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -40,11 +43,12 @@
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  color: #fff;
+  background: #1E3A8A;
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  box-shadow: 0 8px 24px rgba(17, 24, 39, .15);
   flex-shrink: 0;
   position: relative;
   z-index: 1;
@@ -64,15 +68,29 @@
 }
 
 .profile-info h2 {
+  position: relative;
   margin: 0;
-  color: #0f172a;
+  padding-bottom: .5rem;
+  color: #111827;
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: -.02em;
 }
 
+.profile-info h2::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 48px;
+  height: 3px;
+  border-radius: 2px;
+  background: #F97316;
+}
+
 .username {
-  color: #64748b;
+  color: #111827;
+  opacity: .6;
   margin: 0;
   font-family: 'Courier New', monospace;
   font-size: .95rem;
@@ -82,18 +100,19 @@
   display: inline-block;
   padding: .35rem .85rem;
   border-radius: 20px;
-  color: #fff;
+  color: #FFFFFF;
+  background: #1E3A8A;
   font-size: .75rem;
   font-weight: 700;
   letter-spacing: .8px;
   margin-top: .5rem;
   width: fit-content;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  box-shadow: 0 2px 8px rgba(17, 24, 39, .15);
   text-transform: uppercase;
 }
 
 /* ============================================================
-   PROFILE — Grille
+   GRILLE
    ============================================================ */
 .grid {
   display: grid;
@@ -105,30 +124,38 @@
   .grid {
     grid-template-columns: 1fr;
   }
+
   .profile-header {
     flex-direction: column;
     text-align: center;
     padding: 1.5rem;
   }
+
   .profile-info {
     align-items: center;
+  }
+
+  .profile-info h2::after {
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 
 /* ============================================================
-   PROFILE — Cartes
+   CARTES
    ============================================================ */
 .card {
-  background: #fff;
+  background: #FFFFFF;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,.08);
-  border-left: 4px solid #3b82f6;
-  transition: box-shadow .2s;
+  box-shadow: 0 2px 12px rgba(17, 24, 39, .08);
+  border-left: 4px solid #1E3A8A;
+  transition: box-shadow .2s, transform .2s;
 }
 
 .card:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,.08);
+  box-shadow: 0 8px 24px rgba(17, 24, 39, .12);
+  transform: translateY(-2px);
 }
 
 .card-header {
@@ -136,28 +163,28 @@
   align-items: center;
   gap: .5rem;
   margin-bottom: 1rem;
-  color: #1e40af;
+  color: #1E3A8A;
   padding-bottom: .75rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(17, 24, 39, .08);
 }
 
 .card-header h3 {
   margin: 0;
   font-size: 1rem;
-  color: #0f172a;
+  color: #111827;
   font-weight: 700;
 }
 
 /* ============================================================
-   PROFILE — Lignes d'information
+   LIGNES D'INFORMATION
    ============================================================ */
 .info-row {
   display: flex;
   align-items: center;
   gap: .75rem;
   padding: .75rem 0;
-  border-bottom: 1px solid #f1f5f9;
-  color: #64748b;
+  border-bottom: 1px solid rgba(17, 24, 39, .08);
+  color: #111827;
 }
 
 .info-row:last-child {
@@ -172,7 +199,8 @@
 
 .info-row .label {
   font-size: .7rem;
-  color: #94a3b8;
+  color: #111827;
+  opacity: .5;
   text-transform: uppercase;
   letter-spacing: .8px;
   font-weight: 600;
@@ -180,27 +208,28 @@
 }
 
 .info-row .value {
-  color: #1e293b;
+  color: #111827;
   font-weight: 600;
   font-size: .95rem;
 }
 
 /* ============================================================
-   PROFILE — Carte rôle / permissions
+   CARTE RÔLE / PERMISSIONS
    ============================================================ */
 .role-card {
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #1E3A8A;
 }
 
 .role-description {
-  color: #475569;
+  color: #111827;
+  opacity: .8;
   line-height: 1.7;
   margin: 0;
   font-size: .95rem;
 }
 
 /* ============================================================
-   PROFILE — Formulaire mot de passe
+   FORMULAIRE MOT DE PASSE
    ============================================================ */
 .pwd-form {
   display: flex;
@@ -216,7 +245,7 @@
   display: block;
   font-size: .85rem;
   font-weight: 600;
-  color: #334155;
+  color: #111827;
   margin-bottom: .4rem;
 }
 
@@ -229,35 +258,37 @@
 .pwd-form .input-icon {
   position: absolute;
   left: 12px;
-  color: #94a3b8;
+  color: #111827;
+  opacity: .4;
   pointer-events: none;
-  transition: color .2s;
+  transition: color .2s, opacity .2s;
 }
 
 .pwd-form input {
   width: 100%;
   padding: .75rem .75rem .75rem 2.6rem;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid rgba(17, 24, 39, .25);
   border-radius: 8px;
   font-size: .95rem;
-  color: #0f172a;
-  background: #fff;
-  transition: all .2s;
+  color: #111827;
+  background: #FFFFFF;
+  transition: border-color .2s, box-shadow .2s;
   font-family: inherit;
 }
 
 .pwd-form input::placeholder {
-  color: #94a3b8;
+  color: #111827;
+  opacity: .35;
 }
 
 .pwd-form input:hover {
-  border-color: #94a3b8;
+  border-color: rgba(17, 24, 39, .45);
 }
 
 .pwd-form input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+  border-color: #1E3A8A;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, .15);
 }
 
 .pwd-form .toggle-pwd {
@@ -265,7 +296,8 @@
   right: 8px;
   background: none;
   border: none;
-  color: #94a3b8;
+  color: #111827;
+  opacity: .5;
   cursor: pointer;
   padding: 6px;
   border-radius: 4px;
@@ -276,32 +308,37 @@
 }
 
 .pwd-form .toggle-pwd:hover {
-  background: #f1f5f9;
-  color: #475569;
+  background: rgba(17, 24, 39, .06);
+  opacity: 1;
 }
 
+/* ---------- Bouton principal : bleu ciel + blanc → orange au survol ---------- */
 .pwd-form button[type="submit"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: .5rem;
   padding: .75rem 1.5rem;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #fff;
+  background: #1E3A8A;
+  color: #FFFFFF;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   font-size: .95rem;
   margin-top: .5rem;
-  transition: all .2s;
+  transition: background .2s, transform .15s;
   font-family: inherit;
   width: fit-content;
 }
 
 .pwd-form button[type="submit"]:hover:not(:disabled) {
+  background: #F97316;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(59,130,246,.4);
+}
+
+.pwd-form button[type="submit"]:active:not(:disabled) {
+  transform: scale(.98);
 }
 
 .pwd-form button[type="submit"]:disabled {
@@ -310,7 +347,7 @@
 }
 
 /* ============================================================
-   PROFILE — Messages
+   MESSAGES — sans rouge
    ============================================================ */
 .msg-success,
 .msg-error {
@@ -321,6 +358,7 @@
   border-radius: 8px;
   font-size: .9rem;
   margin: .5rem 0;
+  color: #FFFFFF;
   animation: slideIn .3s ease-out;
 }
 
@@ -330,13 +368,9 @@
 }
 
 .msg-success {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+  background: #1E3A8A;
 }
 
 .msg-error {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
+  background: #F97316;
 }

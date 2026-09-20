@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ApiService } from '../../services/api.service';
-import { GeolocationService } from '../../services/geolocation.service';
-import { WeatherService } from '../../services/weather.service';
-import { TimeService } from '../../services/time.service';
-import { WeatherCurrent } from '../../models/weather.model';
+import { Router } from '@angular/router';
+import { ProductService } from '../../services/product.service';
+import { CustomerService } from '../../services/customer.service';
+import { OrderService } from '../../services/order.service';
 import { IconComponent } from '../../components/icon/icon.component';
+import { Product } from '../../models/product.model';
+import { Customer } from '../../models/customer.model';
+import { Order } from '../../models/order.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,87 +15,65 @@ import { IconComponent } from '../../components/icon/icon.component';
   imports: [CommonModule, IconComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
-
 })
 export class DashboardComponent implements OnInit {
-  totalCategorias = 0;
-  totalFornecedores = 0;
-  totalProdutos = 0;
+  totalProducts = 0;
+  totalCustomers = 0;
+  totalOrders = 0;
+  totalRevenue = 0;
   stockTotal = 0;
-
-  city = '...';
-  country = '';
-  latitude: number | null = null;
-  longitude: number | null = null;
-  locationError = '';
-
-  weather: WeatherCurrent | null = null;
-  weatherLoading = false;
-  weatherError = '';
-
-  currentTime = '';
-  currentDate = '';
+  lowStockProducts: Product[] = [];
+  recentOrders: Order[] = [];
+  loading = true;
+  erro = '';
 
   constructor(
-    private api: ApiService,
-    private geo: GeolocationService,
-    private weatherApi: WeatherService,
-    private timeApi: TimeService
+    private productService: ProductService,
+    private customerService: CustomerService,
+    private orderService: OrderService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadStock();
-    this.loadLocation();
-    this.timeApi.getCurrentTime().subscribe(() => this.tick());
-    setInterval(() => this.tick(), 1000);
+    this.carregar();
   }
 
-  private loadStock(): void {
-    this.api.getCategorias().subscribe(d => this.totalCategorias = d.length);
-    this.api.getFornecedores().subscribe(d => this.totalFornecedores = d.length);
-    this.api.getProdutos().subscribe(d => {
-      this.totalProdutos = d.length;
-      this.stockTotal = d.reduce((s, p) => s + (p.quantidade || 0), 0);
-    });
-  }
+  carregar(): void {
+    this.loading = true;
 
-  private tick(): void {
-    const now = new Date();
-    this.currentTime = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    this.currentDate = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  }
-
-  private loadLocation(): void {
-    this.locationError = '';
-    this.geo.getCurrentPosition().subscribe({
-      next: (pos) => {
-        this.latitude = pos.latitude;
-        this.longitude = pos.longitude;
-        this.geo.reverseGeocode(pos.latitude, pos.longitude).subscribe({
-          next: (r: any) => {
-            this.city = r.city || r.locality || 'Inconnu';
-            this.country = r.countryName || '';
-          },
-          error: () => { this.city = 'Position inconnue'; }
-        });
-        this.loadWeather(pos.latitude, pos.longitude);
+    // Produits
+    this.productService.findAll().subscribe({
+      next: (d) => {
+        this.totalProducts = d.length;
+        this.stockTotal = d.reduce((sum, p) => sum + (p.availableQuantity || 0), 0);
+        this.lowStockProducts = d
+          .filter(p => (p.availableQuantity || 0) < 10)
+          .sort((a, b) => (a.availableQuantity || 0) - (b.availableQuantity || 0))
+          .slice(0, 5);
       },
-      error: (e) => {
-        this.locationError = e.message || 'Impossible d\'obtenir la position';
-        this.city = 'Localisation refusée';
-      }
+      error: (e) => this.erro = e?.error?.message || 'Erreur produits'
+    });
+
+    // Clients
+    this.customerService.findAll().subscribe({
+      next: (d) => this.totalCustomers = d.length,
+      error: (e) => this.erro = e?.error?.message || 'Erreur clients'
+    });
+
+    this.orderService.findAll().subscribe({
+      next: (d) => {
+        this.totalOrders = d.length;
+        this.totalRevenue = d.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+        this.recentOrders = d
+          .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+          .slice(0, 5);
+        this.loading = false;
+      },
+      error: (e) => { this.erro = e?.error?.message || 'Erreur commandes'; this.loading = false; }
     });
   }
 
-  private loadWeather(lat: number, lon: number): void {
-    this.weatherLoading = true;
-    this.weatherError = '';
-    this.weatherApi.getCurrentWeather(lat, lon).subscribe({
-      next: (w) => { this.weather = w.current_weather; this.weatherLoading = false; },
-      error: () => { this.weatherError = 'Météo indisponible'; this.weatherLoading = false; }
-    });
+  goTo(path: string): void {
+    this.router.navigate([path]);
   }
-
-  weatherLabel(code: number): string { return this.weatherApi.weatherDescription(code); }
-  refreshLocation(): void { this.loadLocation(); }
 }

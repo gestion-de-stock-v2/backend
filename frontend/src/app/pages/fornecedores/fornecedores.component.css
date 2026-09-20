@@ -1,52 +1,60 @@
 /* ============================================================
-   FOURNISSEURS
+   FOURNISSEURS — BLEU CIEL + BLANC
+   Normal : bleu ciel #1E3A8A + blanc
+   Hover  : orange #F97316
    ============================================================ */
 :host {
   display: block;
 }
 
+/* ---------- Titre ---------- */
 h2 {
   display: flex;
   align-items: center;
   gap: .6rem;
-  margin: 0 0 1.5rem;
-  color: #0f172a;
+  margin: 0 0 1.75rem;
+  color: #111827;
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: -.02em;
 }
 
-/* ============================================================
-   Formulaire
-   ============================================================ */
+/* ---------- Formulaire ---------- */
 .form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: .75rem;
-  background: #fff;
+  background: #FFFFFF;
   padding: 1.25rem;
   border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.06);
-  border-left: 4px solid #3b82f6;
+  box-shadow: 0 2px 12px rgba(17, 24, 39, .08);
+  border-left: 4px solid #1E3A8A;
   margin-bottom: 1.5rem;
 }
 
 .form input {
   padding: .7rem .9rem;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid rgba(17, 24, 39, .25);
   border-radius: 8px;
   font-size: .95rem;
-  color: #0f172a;
+  color: #111827;
+  background: #FFFFFF;
   font-family: inherit;
-  transition: all .2s;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.form input::placeholder {
+  color: #111827;
+  opacity: .35;
 }
 
 .form input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+  border-color: #1E3A8A;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, .15);
 }
 
+/* ---------- Bouton Ajouter : bleu ciel + blanc → orange au survol ---------- */
 .form button {
   padding: .7rem 1.2rem;
   border: none;
@@ -55,25 +63,14 @@ h2 {
   font-weight: 600;
   font-size: .9rem;
   font-family: inherit;
-  transition: all .2s;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #fff;
+  background: #1E3A8A;
+  color: #FFFFFF;
+  transition: background .2s, transform .15s;
 }
 
 .form button:hover:not(:disabled) {
+  background: #F97316;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(59,130,246,.4);
-}
-
-.form button[type="button"] {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-}
-
-.form button[type="button"]:hover {
-  background: #e2e8f0;
-  box-shadow: none;
 }
 
 .form button:disabled {
@@ -83,25 +80,31 @@ h2 {
 
 .hint {
   grid-column: 1 / -1;
-  color: #b91c1c;
+  color: #F97316;
   font-size: .8rem;
   font-weight: 500;
 }
 
-/* ============================================================
-   Tableau
-   ============================================================ */
+.erro {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: #1E3A8A;
+  color: #FFFFFF;
+  padding: .7rem 1rem;
+  border-radius: 8px;
+  font-size: .9rem;
+  margin: 0 0 1rem;
+}
+
+/* ---------- Tableau ---------- */
 .table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  background: #FFFFFF;
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0,0,0,.06);
-}
-
-.table thead {
-  background: #f8fafc;
+  box-shadow: 0 2px 12px rgba(17, 24, 39, .08);
 }
 
 .table th {
@@ -109,16 +112,16 @@ h2 {
   text-align: left;
   font-size: .78rem;
   font-weight: 700;
-  color: #475569;
+  color: #FFFFFF;
+  background: #1E3A8A;
   text-transform: uppercase;
   letter-spacing: .5px;
-  border-bottom: 1px solid #e2e8f0;
 }
 
 .table td {
   padding: .85rem 1rem;
-  border-bottom: 1px solid #f1f5f9;
-  color: #1e293b;
+  border-bottom: 1px solid rgba(17, 24, 39, .08);
+  color: #111827;
   font-size: .9rem;
 }
 
@@ -127,15 +130,16 @@ h2 {
 }
 
 .table tbody tr:hover {
-  background: #f8fafc;
+  background: rgba(17, 24, 39, .04);
 }
 
 .table tbody tr:last-child td {
   border-bottom: none;
 }
 
+/* ---------- Boutons d'action : bleu ciel + blanc → orange au survol ---------- */
 .table td button {
-  padding: .4rem .8rem;
+  padding: .45rem .9rem;
   margin-right: .35rem;
   border: none;
   border-radius: 6px;
@@ -143,23 +147,12 @@ h2 {
   font-size: .8rem;
   font-weight: 600;
   font-family: inherit;
-  transition: all .2s;
+  background: #1E3A8A;
+  color: #FFFFFF;
+  transition: background .2s, transform .15s;
 }
 
-.table td button:first-child {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.table td button:first-child:hover {
-  background: #fde68a;
-}
-
-.table td button:last-child {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.table td button:last-child:hover {
-  background: #fecaca;
+.table td button:hover {
+  background: #F97316;
+  transform: translateY(-1px);
 }

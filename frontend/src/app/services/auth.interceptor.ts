@@ -6,9 +6,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const token = auth.getToken();
 
-  if (token && req.url.startsWith('/api')) {
-    const cloned = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
-    return next(cloned);
+  const isPublicAuth =
+    req.url.includes('/api/auth/login') ||
+    req.url.includes('/api/auth/register') ||
+    req.url.includes('/api/auth/forgot-password') ||
+    req.url.includes('/api/auth/reset-password');
+
+  if (token && req.url.startsWith('/api') && !isPublicAuth) {
+    return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));
   }
   return next(req);
 };

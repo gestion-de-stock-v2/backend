@@ -27,7 +27,6 @@
     <!-- Menu utilisateur -->
     <div class="user-menu" *ngIf="auth.currentUser() as u">
 
-      <!-- Chip utilisateur -->
       <a routerLink="/profile" class="user-chip" [style.--role-color]="getRoleColor(u.role)">
         <span class="user-avatar">
           <app-icon name="user" [size]="18"></app-icon>
@@ -38,10 +37,8 @@
         </span>
       </a>
 
-      <!-- Toggle dark mode -->
       <app-theme-toggle></app-theme-toggle>
 
-      <!-- Déconnexion -->
       <button class="logout-btn" (click)="auth.logout()" title="Déconnexion">
         <app-icon name="logout" [size]="18"></app-icon>
         <span>Déconnexion</span>
@@ -51,29 +48,72 @@
   </div>
 
   <nav class="header-nav">
+
+    <!-- ===== TABLEAU DE BORD ===== -->
     <a routerLink="/dashboard" routerLinkActive="active">
       <app-icon name="dashboard" [size]="18"></app-icon>
       <span>Tableau de bord</span>
     </a>
+
+    <!-- ===== PRODUITS (hub avec les 2 composants) ===== -->
+    <a routerLink="/products-hub" routerLinkActive="active">
+      <app-icon name="box" [size]="18"></app-icon>
+      <span>Produits</span>
+    </a>
+
+    <!-- ===== STOCK ===== -->
+    <a routerLink="/stock" routerLinkActive="active">
+      <app-icon name="package" [size]="18"></app-icon>
+      <span>Stock</span>
+    </a>
+
+    <!-- ===== CLIENTS ===== -->
+    <a routerLink="/customers" routerLinkActive="active">
+      <app-icon name="users" [size]="18"></app-icon>
+      <span>Clients</span>
+    </a>
+
+    <!-- ===== COMMANDES ===== -->
+    <a routerLink="/orders" routerLinkActive="active">
+      <app-icon name="cart" [size]="18"></app-icon>
+      <span>Commandes</span>
+    </a>
+
+    <!-- ===== PAIEMENTS ===== -->
+    <a routerLink="/payments" routerLinkActive="active">
+      <app-icon name="key" [size]="18"></app-icon>
+      <span>Paiements</span>
+    </a>
+
+    <!-- ===== CATÉGORIES (monolithe) ===== -->
     <a routerLink="/categories" routerLinkActive="active">
       <app-icon name="tag" [size]="18"></app-icon>
       <span>Catégories</span>
     </a>
+
+    <!-- ===== FOURNISSEURS (monolithe) ===== -->
     <a routerLink="/fornecedores" routerLinkActive="active">
       <app-icon name="truck" [size]="18"></app-icon>
       <span>Fournisseurs</span>
     </a>
-    <a routerLink="/produtos" routerLinkActive="active">
-      <app-icon name="box" [size]="18"></app-icon>
-      <span>Produits</span>
-    </a>
+
+    <!-- ===== MOUVEMENTS (monolithe) ===== -->
     <a routerLink="/mouvements" routerLinkActive="active">
       <app-icon name="swap" [size]="18"></app-icon>
       <span>Mouvements</span>
     </a>
+
+    <!-- ===== UTILISATEURS (ADMIN uniquement) ===== -->
     <a routerLink="/usuarios" routerLinkActive="active" *ngIf="auth.isAdmin()">
       <app-icon name="users" [size]="18"></app-icon>
       <span>Utilisateurs</span>
     </a>
+
+    <!-- ===== PARAMÈTRES ===== -->
+    <a routerLink="/settings" routerLinkActive="active">
+      <app-icon name="settings" [size]="18"></app-icon>
+      <span>Paramètres</span>
+    </a>
+
   </nav>
 </header>
