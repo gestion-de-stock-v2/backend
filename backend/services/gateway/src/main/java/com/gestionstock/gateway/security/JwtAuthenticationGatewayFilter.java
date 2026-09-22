@@ -83,13 +83,24 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
                     .parseSignedClaims(authorization.substring(7))
                     .getPayload();
 
+            String username = claims.getSubject();
+            String role = claims.get("role", String.class);
+
+            // Un jeton correctement signe mais depourvu de sujet ou de role ne permet
+            // aucune decision d'autorisation en aval : il est refuse plutot que
+            // propage avec un en-tete vide, que les services interpreteraient mal.
+            if (username == null || username.isBlank() || role == null || role.isBlank()) {
+                log.warn("Jeton valide mais incomplet (sujet ou role absent) sur {}", path);
+                return unauthorized(exchange, "Jeton invalide ou expire");
+            }
+
             ServerHttpRequest request = exchange.getRequest().mutate()
                     .headers(h -> {
                         h.remove(USER_HEADER);
                         h.remove(ROLE_HEADER);
                     })
-                    .header(USER_HEADER, claims.getSubject())
-                    .header(ROLE_HEADER, claims.get("role", String.class))
+                    .header(USER_HEADER, username)
+                    .header(ROLE_HEADER, role)
                     .build();
 
             return chain.filter(exchange.mutate().request(request).build());

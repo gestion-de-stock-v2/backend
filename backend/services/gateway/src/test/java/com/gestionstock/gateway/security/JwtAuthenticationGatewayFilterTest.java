@@ -190,4 +190,25 @@ class JwtAuthenticationGatewayFilterTest {
         assertNull(headers.getFirst(JwtAuthenticationGatewayFilter.USER_HEADER));
         assertNull(headers.getFirst(JwtAuthenticationGatewayFilter.ROLE_HEADER));
     }
+
+    /**
+     * Un jeton correctement signe mais sans claim "role" ne permet aucune decision
+     * d'autorisation : il doit etre refuse, et non propage avec un en-tete vide.
+     */
+    @Test
+    void rejectsValidlySignedTokenWithoutRoleClaim() {
+        String noRole = Jwts.builder()
+                .subject("alice")
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8)))
+                .compact();
+
+        var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/api/v1/products")
+                .header("Authorization", "Bearer " + noRole)
+                .build());
+
+        filter.filter(exchange, e -> Mono.empty()).block();
+
+        assertEquals(HttpStatus.UNAUTHORIZED, exchange.getResponse().getStatusCode());
+    }
 }
