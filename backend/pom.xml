@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>gestion.stock</groupId>
+    <artifactId>backend-parent</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>backend-parent</name>
+    <description>Backend complet : standalone + microservices</description>
+
+    <!-- ============================================================
+         MODULES
+         ============================================================ -->
+    <modules>
+        <!-- Backend standalone (auth JWT, 7 rôles, CRUD produits) -->
+        <module>standalone</module>
+
+        <!-- Microservices Spring Cloud -->
+        <module>ms-stock-management/services/config-server</module>
+        <module>ms-stock-management/services/discovery</module>
+        <module>ms-stock-management/services/gateway</module>
+        <module>ms-stock-management/services/customer</module>
+        <module>ms-stock-management/services/product</module>
+        <module>ms-stock-management/services/order</module>
+        <module>ms-stock-management/services/payment</module>
+        <module>ms-stock-management/services/notification</module>
+    </modules>
+
+</project>
