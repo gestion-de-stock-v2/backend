@@ -1,5 +1,9 @@
 # payment-service
 
+> **Authentification requise.** Toutes les routes de ce service passent par la
+> passerelle, qui exige un jeton JWT valide. Voir [gateway.md](gateway.md).
+
+
 [⬅ Retour au sommaire](../API_DOCUMENTATION.md)
 
 | | |
@@ -9,7 +13,7 @@
 | **Base path (via gateway)** | `/api/v1/payments` |
 | **Base de données** | PostgreSQL (`payment`), `ddl-auto: create` (schéma recréé à chaque démarrage) |
 | **Authentification** | Aucune |
-| **Package** | `com.franck.ecommerce.payment` |
+| **Package** | `com.gestionstock.payment` |
 
 Enregistre un paiement et publie un événement Kafka (`payment-topic`) consommé par `notification-service` pour l'email de confirmation. Appelé de façon synchrone par `order-service` (Feign) à la fin du flux de création de commande.
 

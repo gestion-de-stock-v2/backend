@@ -1,28 +1,28 @@
-# Getting Started
+# notification-service
 
-### Reference Documentation
-For further reference, please consider the following sections:
+Envoi des e-mails transactionnels et historisation des notifications.
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/3.2.0/maven-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/3.2.0/maven-plugin/reference/html/#build-image)
-* [Spring Boot Actuator](https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/index.html#actuator)
-* [Eureka Discovery Client](https://docs.spring.io/spring-cloud-netflix/docs/current/reference/html/#service-discovery-eureka-clients)
-* [Config Client Quick Start](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/#_client_side_usage)
-* [Spring Web](https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/index.html#web)
-* [Spring for Apache Kafka](https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/index.html#messaging.kafka)
-* [Java Mail Sender](https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/index.html#io.email)
-* [Thymeleaf](https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/index.html#web.servlet.spring-mvc.template-engines)
-* [Spring Data MongoDB](https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/index.html#data.nosql.mongodb)
+| | |
+|---|---|
+| Port | `8040` |
+| Stockage | MongoDB `notification` |
+| Configuration | `backend/services/config-server/src/main/resources/configurations/notification-service.yml` |
 
-### Guides
-The following guides illustrate how to use some features concretely:
+## Endpoints
 
-* [Building a RESTful Web Service with Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/)
-* [Service Registration and Discovery with Eureka and Spring Cloud](https://spring.io/guides/gs/service-registration-and-discovery/)
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
-* [Handling Form Submission](https://spring.io/guides/gs/handling-form-submission/)
-* [Accessing Data with MongoDB](https://spring.io/guides/gs/accessing-data-mongodb/)
+- Consomme `order-topic` → e-mail de confirmation de commande
+- Consomme `payment-topic` → e-mail de confirmation de paiement
+- Consomme `password-reset-topic` → lien de réinitialisation de mot de passe
+- En développement, les e-mails sont consultables sur MailDev : http://localhost:1080
 
+## Démarrage
+
+```bash
+# via la pile complète (recommandé)
+docker compose up notification-service
+
+# isolément, config-server et discovery devant tourner
+cd backend && mvn -pl services/notification-service spring-boot:run
+```
+
+Ce service est accessible **via la passerelle** (`:8222`), qui exige un jeton JWT valide.

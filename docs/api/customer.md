@@ -1,5 +1,9 @@
 # customer-service
 
+> **Authentification requise.** Toutes les routes de ce service passent par la
+> passerelle, qui exige un jeton JWT valide. Voir [gateway.md](gateway.md).
+
+
 [⬅ Retour au sommaire](../API_DOCUMENTATION.md)
 
 | | |
@@ -9,7 +13,7 @@
 | **Base path (via gateway)** | `/api/v1/customers` (préfixe de route : `Path=/api/v1/customers/**`) |
 | **Base de données** | MongoDB (`customer`) |
 | **Authentification** | Aucune — pas de dépendance Spring Security dans le repo, tous les endpoints sont ouverts |
-| **Package** | `com.franck.ecommerce.customer` |
+| **Package** | `com.gestionstock.customer` |
 
 Gère le référentiel clients (CRUD). Consommé de façon synchrone par `order-service` (`CustomerClient`, Feign) pour valider l'existence d'un client et récupérer ses coordonnées avant de créer une commande.
 

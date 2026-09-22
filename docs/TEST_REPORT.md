@@ -1,3 +1,9 @@
+> **Archive.** Ce rapport a été produit sur l'architecture précédente
+> (deux backends distincts, aucune authentification, `product-service` séparé).
+> Il est conservé pour mémoire ; plusieurs constats ont depuis été corrigés lors
+> de l'unification en microservices. Voir [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
+> pour l'état courant.
+
 # Rapport de tests end-to-end — ms-stock-management
 
 > ✅ **Mise à jour du 2026-08-20** : les 6 anomalies détectées ci-dessous ont toutes été **corrigées et revalidées en conditions réelles** (nouvel environnement complet, mêmes scénarios rejoués). Voir la section [Corrections apportées](#corrections-apportées-et-revalidées) en fin de document pour le détail et les preuves. Le corps du rapport ci-dessous est conservé **tel qu'exécuté initialement**, comme trace du diagnostic.
@@ -131,13 +137,13 @@ Préconditions : mêmes que Flow 3, stock produit 1 = 8 après Flow 3.
 | 🔴 Critique | notification-service | Tempête de retries Kafka + duplication MongoDB + perte silencieuse d'email sur échec SMTP | [notification.md](api/notification.md) |
 | 🔴 Critique | order-service | `amount` de la commande jamais persisté (`OrderMapper.toOrder()` incomplet) | [order.md](api/order.md) |
 | 🟠 Majeur | order-service | Toute erreur métier en aval (client/produit/stock introuvable) remonte en `500` générique indifférencié, y compris "client introuvable" pourtant censé être un `400` d'après le code | [order.md](api/order.md) |
-| 🟡 Mineur | product-service | `GET /{product-id}` renvoie `400` au lieu de `404` pour un produit introuvable | [product.md](api/product.md) |
+| 🟡 Mineur | product-service | `GET /{product-id}` renvoie `400` au lieu de `404` pour un produit introuvable | [stock.md](api/stock.md) |
 | 🟡 Mineur | customer-service | `PUT` ignore silencieusement le champ `lastname` | [customer.md](api/customer.md) |
 | 🟡 Mineur | payment-service | Aucune validation métier réelle (montant négatif, email invalide acceptés sans erreur) | [payment.md](api/payment.md) |
 
 ## Collection Postman
 
-Une collection Postman correspondant à l'ensemble des requêtes exécutées ci-dessus est disponible : [`docs/postman/ms-stock-management.postman_collection.json`](postman/ms-stock-management.postman_collection.json). Variable d'environnement à définir : `gatewayUrl` = `http://localhost:8222`. **Mise à jour du 2026-08-20** : les scripts de test reflètent désormais le comportement **corrigé** (404/400 avec messages exploitables, `amount` présent, `lastname` mis à jour, CORS) — plus l'ancien comportement bugué. Une nouvelle section CORS y a été ajoutée.
+Une collection Postman correspondant à l'ensemble des requêtes exécutées ci-dessus est disponible : [`docs/postman/gestion-de-stock.postman_collection.json`](postman/gestion-de-stock.postman_collection.json). Variable d'environnement à définir : `gatewayUrl` = `http://localhost:8222`. **Mise à jour du 2026-08-20** : les scripts de test reflètent désormais le comportement **corrigé** (404/400 avec messages exploitables, `amount` présent, `lastname` mis à jour, CORS) — plus l'ancien comportement bugué. Une nouvelle section CORS y a été ajoutée.
 
 ---
 
@@ -170,7 +176,7 @@ En plus des 6 bugs ci-dessus, 3 points identifiés en cours de mission (Phase 1 
 | B | CORS non configuré sur la gateway | `spring.cloud.gateway.globalcors` ajouté (toutes origines/méthodes/en-têtes, sans credentials) dans la config centralisée | Requête `OPTIONS` preflight réelle avec `Origin: http://localhost:3000` → `200 OK` avec `Access-Control-Allow-Origin: http://localhost:3000` dans la réponse ; confirmé aussi sur un `GET` classique |
 | C | Pas de transaction distribuée/saga : le stock décrémenté n'était jamais restauré si une étape après l'achat échouait | Compensation de stock (saga légère) : nouvel endpoint `POST /api/v1/products/restore` (best-effort) + `OrderService.createOrder()` compense désormais le stock sur toute erreur entre l'achat et la confirmation du paiement | `payment-service` arrêté artificiellement → commande passée sur un produit à 8 en stock → décrément à 5 confirmé → échec du paiement (500 relayé par la gateway, lui-même relayé par le `FeignException` handler) → stock revenu à 8, aucune commande orpheline en base (rollback JPA local + compensation distante). Flux nominal revérifié fonctionnel juste après (décrément normal, pas de compensation déclenchée à tort). |
 
-Détail complet : [order.md](api/order.md#-compensation-de-stock-saga-légère--ajoutée-le-2026-08-20), [product.md](api/product.md), [gateway.md](api/gateway.md#cors).
+Détail complet : [order.md](api/order.md#-compensation-de-stock-saga-légère--ajoutée-le-2026-08-20), [stock.md](api/stock.md), [gateway.md](api/gateway.md#cors).
 
 **Ce qui reste volontairement non traité** (limites explicites, pas des bugs) :
 - La compensation est *best-effort*, pas une saga complète (pas d'outbox, pas d'état persisté/rejouable).

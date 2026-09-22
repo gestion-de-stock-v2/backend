@@ -1,22 +1,25 @@
-# Getting Started
+# customer-service
 
-### Reference Documentation
-For further reference, please consider the following sections:
+Gestion des clients.
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/3.0.2/maven-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/3.0.2/maven-plugin/reference/html/#build-image)
-* [Spring Data MongoDB](https://docs.spring.io/spring-boot/docs/3.0.2/reference/htmlsingle/#data.nosql.mongodb)
-* [Eureka Discovery Client](https://docs.spring.io/spring-cloud-netflix/docs/current/reference/html/#service-discovery-eureka-clients)
-* [Spring Web](https://docs.spring.io/spring-boot/docs/3.0.2/reference/htmlsingle/#web)
-* [Config Client Quick Start](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/#_client_side_usage)
+| | |
+|---|---|
+| Port | `8090` |
+| Stockage | MongoDB `customer` |
+| Configuration | `backend/services/config-server/src/main/resources/configurations/customer-service.yml` |
 
-### Guides
-The following guides illustrate how to use some features concretely:
+## Endpoints
 
-* [Accessing Data with MongoDB](https://spring.io/guides/gs/accessing-data-mongodb/)
-* [Service Registration and Discovery with Eureka and Spring Cloud](https://spring.io/guides/gs/service-registration-and-discovery/)
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
+- `/api/v1/customers` — CRUD
 
+## Démarrage
+
+```bash
+# via la pile complète (recommandé)
+docker compose up customer-service
+
+# isolément, config-server et discovery devant tourner
+cd backend && mvn -pl services/customer-service spring-boot:run
+```
+
+Ce service est accessible **via la passerelle** (`:8222`), qui exige un jeton JWT valide.

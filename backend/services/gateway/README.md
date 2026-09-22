@@ -1,18 +1,28 @@
-# Getting Started
+# gateway
 
-### Reference Documentation
-For further reference, please consider the following sections:
+Point d'entrée unique du système. Valide le JWT de chaque requête, applique la politique CORS et route vers les services via Eureka.
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/3.0.2/maven-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/3.0.2/maven-plugin/reference/html/#build-image)
-* [Config Client Quick Start](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/#_client_side_usage)
-* [Gateway](https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/)
-* [Eureka Discovery Client](https://docs.spring.io/spring-cloud-netflix/docs/current/reference/html/#service-discovery-eureka-clients)
+| | |
+|---|---|
+| Port | `8222` |
+| Stockage | — |
+| Configuration | `backend/services/config-server/src/main/resources/configurations/gateway-service.yml` |
 
-### Guides
-The following guides illustrate how to use some features concretely:
+## Endpoints
 
-* [Using Spring Cloud Gateway](https://github.com/spring-cloud-samples/spring-cloud-gateway-sample)
-* [Service Registration and Discovery with Eureka and Spring Cloud](https://spring.io/guides/gs/service-registration-and-discovery/)
+- Routes déclarées explicitement ; `discovery.locator` est **désactivé** (il exposait le config-server).
+- Chemins publics : `/api/v1/auth/{login,register,forgot-password,reset-password}`
+- Tout le reste exige `Authorization: Bearer <jeton>`
+- Propage `X-User-Name` et `X-User-Role` en aval, après avoir effacé ceux fournis par le client.
 
+## Démarrage
+
+```bash
+# via la pile complète (recommandé)
+docker compose up gateway
+
+# isolément, config-server et discovery devant tourner
+cd backend && mvn -pl services/gateway spring-boot:run
+```
+
+Ce service est accessible **via la passerelle** (`:8222`), qui exige un jeton JWT valide.

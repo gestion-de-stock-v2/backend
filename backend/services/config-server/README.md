@@ -1,17 +1,26 @@
-# Getting Started
+# config-server
 
-### Reference Documentation
-For further reference, please consider the following sections:
+Sert la configuration de tous les services depuis `src/main/resources/configurations/`, en profil `native`.
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/3.0.2/maven-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/3.0.2/maven-plugin/reference/html/#build-image)
-* [Spring Boot Actuator](https://docs.spring.io/spring-boot/docs/3.0.2/reference/htmlsingle/#actuator)
-* [Config Server](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/#_spring_cloud_config_server)
+| | |
+|---|---|
+| Port | `8888` |
+| Stockage | — |
+| Configuration | `backend/services/config-server/src/main/resources/configurations/config-server-service.yml` |
 
-### Guides
-The following guides illustrate how to use some features concretely:
+## Endpoints
 
-* [Building a RESTful Web Service with Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/)
-* [Centralized Configuration](https://spring.io/guides/gs/centralized-configuration/)
+- `GET /{application}/{profile}` — configuration d'un service
+- **Non exposé sur la machine hôte** : il sert les identifiants de toutes les bases.
 
+## Démarrage
+
+```bash
+# via la pile complète (recommandé)
+docker compose up config-server
+
+# isolément, config-server et discovery devant tourner
+cd backend && mvn -pl services/config-server spring-boot:run
+```
+
+Ce service est accessible **via la passerelle** (`:8222`), qui exige un jeton JWT valide.

@@ -1,5 +1,9 @@
 # order-service
 
+> **Authentification requise.** Toutes les routes de ce service passent par la
+> passerelle, qui exige un jeton JWT valide. Voir [gateway.md](gateway.md).
+
+
 [⬅ Retour au sommaire](../API_DOCUMENTATION.md)
 
 | | |
@@ -9,7 +13,7 @@
 | **Base path (via gateway)** | `/api/v1/orders` et `/api/v1/order-lines` (deux routes gateway distinctes vers le même service) |
 | **Base de données** | PostgreSQL (`order`), `ddl-auto: create` (schéma recréé à chaque démarrage — **toutes les données sont perdues** à chaque redémarrage du service) |
 | **Authentification** | Aucune |
-| **Package** | `com.franck.ecommerce.order`, `com.franck.ecommerce.orderline` |
+| **Package** | `com.gestionstock.order`, `com.gestionstock.orderline` |
 
 Service central du flux d'achat : orchestre `customer-service` (Feign, synchrone), `product-service` (RestTemplate, synchrone), `payment-service` (Feign, synchrone) puis publie un événement Kafka `order-topic` consommé par `notification-service`.
 
