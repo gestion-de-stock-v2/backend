@@ -1,28 +1,55 @@
 server:
   port: 8222
+
 spring:
   cloud:
     gateway:
+      # discovery.locator est volontairement DESACTIVE.
+      # Active, il publiait automatiquement tout service enregistre dans Eureka sous
+      # /<service-id>/**, y compris le config-server : /config-server/order-service/default
+      # exposait alors les identifiants de toutes les bases de donnees. Seules les routes
+      # declarees ci-dessous sont accessibles.
       discovery:
         locator:
-          enabled: true
-      # CORS permissif pour le développement local d'un frontend web (autre origine,
-      # ex. localhost:3000). Aucune authentification n'existe actuellement dans ce
-      # backend (voir docs/API_DOCUMENTATION.md), donc allowCredentials reste à false ;
-      # à revoir si une authentification par cookie/session est ajoutée un jour.
+          enabled: false
+
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOriginPatterns: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
+            # Origine restreinte au frontend. Auparavant "*", ce qui autorisait n'importe
+            # quel site a appeler l'API depuis le navigateur d'un utilisateur connecte.
+            allowedOrigins:
+              - ${FRONTEND_URL:http://localhost:4200}
+            allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
             allowedHeaders: "*"
-            allowCredentials: false
+            allowCredentials: true
+            maxAge: 3600
+
       routes:
+        - id: auth-service
+          uri: lb:http://AUTH-SERVICE
+          predicates:
+            - Path=/api/v1/auth/**
+        - id: user-service
+          uri: lb:http://AUTH-SERVICE
+          predicates:
+            - Path=/api/v1/users/**
+        - id: stock-products
+          uri: lb:http://STOCK-SERVICE
+          predicates:
+            - Path=/api/v1/products/**
+        - id: stock-categories
+          uri: lb:http://STOCK-SERVICE
+          predicates:
+            - Path=/api/v1/categories/**
+        - id: stock-suppliers
+          uri: lb:http://STOCK-SERVICE
+          predicates:
+            - Path=/api/v1/suppliers/**
+        - id: stock-movements
+          uri: lb:http://STOCK-SERVICE
+          predicates:
+            - Path=/api/v1/stock-movements/**
         - id: customer-service
           uri: lb:http://CUSTOMER-SERVICE
           predicates:
@@ -35,11 +62,12 @@ spring:
           uri: lb:http://ORDER-SERVICE
           predicates:
             - Path=/api/v1/order-lines/**
-        - id: product-service
-          uri: lb:http://PRODUCT-SERVICE
-          predicates:
-            - Path=/api/v1/products/**
         - id: payment-service
           uri: lb:http://PAYMENT-SERVICE
           predicates:
             - Path=/api/v1/payments/**
+
+# Doit etre strictement identique au secret d'auth-service : la passerelle verifie
+# les jetons que ce dernier emet.
+jwt:
+  secret: ${JWT_SECRET}

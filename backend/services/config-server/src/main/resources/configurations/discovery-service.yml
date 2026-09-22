@@ -1,20 +1,8 @@
 server:
   port: 8761
 
-spring:
-  application:
-    name: discovery-service
-
 eureka:
   client:
+    # Le registre ne s'enregistre pas aupres de lui-meme.
     register-with-eureka: false
     fetch-registry: false
-    service-url:
-      defaultZone: http://localhost:8761/eureka
-  server:
-    enable-self-preservation: false
-
-management:
-  tracing:
-    sampling:
-      probability: 1.0

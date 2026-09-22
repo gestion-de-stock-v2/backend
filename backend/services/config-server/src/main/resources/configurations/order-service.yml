@@ -1,26 +1,33 @@
 server:
   port: 8070
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5433/order
-    username: ${POSTGRES_USER:franck}
-    password: ${POSTGRES_PASSWORD:franck}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/orders
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: create
+      # Etait "create" : le schema etait detruit et recree a chaque demarrage, effacant
+      # toutes les commandes. Le schema appartient desormais a Flyway.
+      ddl-auto: validate
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
   kafka:
     producer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
-        spring.json.type.mapping: orderConfirmation:com.franck.ecommerce.kafka.OrderConfirmation
+        spring.json.type.mapping: orderConfirmation:com.gestionstock.order.kafka.OrderConfirmation
 
 application:
   config:
-    customer-url: http://localhost:8222/api/v1/customers
-    payment-url: http://localhost:8222/api/v1/payments
-    product-url: http://localhost:8222/api/v1/products
+    # Nom de service Eureka, resolu par le RestTemplate @LoadBalanced : le trafic interne
+    # ne passe plus par la passerelle.
+    product-url: http://STOCK-SERVICE/api/v1/products
