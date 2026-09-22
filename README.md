@@ -192,6 +192,35 @@ migration `V<n>__description.sql` ; ne modifiez jamais une migration déjà appl
 
 ---
 
+## Dépannage
+
+**Un port est déjà utilisé.** Les ports exposés sur la machine sont paramétrables
+dans `.env` — utile si un `ng serve` ou un autre projet occupe déjà 4200 ou 5433 :
+
+```bash
+FRONTEND_HOST_PORT=4201
+POSTGRES_HOST_PORT=5434
+```
+
+**`database "stock" does not exist`.** Les bases ne sont créées qu'au tout premier
+démarrage de PostgreSQL, sur un volume vide. Si un `up` précédent a échoué après
+avoir initialisé le volume (conflit de port, par exemple), les scripts d'init sont
+sautés. Repartez d'un volume neuf :
+
+```bash
+docker compose down -v && docker compose up -d
+```
+
+**`503 Service Unavailable` juste après le démarrage.** La passerelle n'a pas
+encore rafraîchi son cache Eureka. Les instances apparaissent au bout de ~30 s ;
+`http://localhost:8761` permet de vérifier qui est enregistré.
+
+**Un service redémarre en boucle.** Consultez la cause exacte :
+
+```bash
+docker compose logs --tail 40 <service>
+```
+
 ## Points connus
 
 - **La sécurité repose sur la passerelle seule.** `stock-service`, `order-service`,
