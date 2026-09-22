@@ -25,7 +25,9 @@ x-service-env: &service-env
   FRONTEND_URL: http://localhost:4200
 
 x-healthcheck: &spring-healthcheck
-  test: ["CMD", "curl", "-fsS", "http://localhost:$${SERVER_PORT}/actuator/health"]
+  # CMD-SHELL et non CMD : la forme exec ne passe pas par un shell, la variable
+  # $SERVER_PORT ne serait alors jamais substituee et curl recevrait l'URL litterale.
+  test: ["CMD-SHELL", "curl -fsS http://localhost:$${SERVER_PORT}/actuator/health || exit 1"]
   interval: 10s
   timeout: 5s
   retries: 30

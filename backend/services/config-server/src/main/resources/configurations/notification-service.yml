@@ -21,10 +21,10 @@ spring:
         # Etait '*' : le consommateur acceptait de desserialiser n'importe quelle classe
         # presente au classpath a partir d'un message Kafka. Restreint au domaine applicatif.
         spring.json.trusted.packages: com.gestionstock.*
-        spring.json.type.mapping: >-
-          orderConfirmation:com.gestionstock.notification.kafka.order.OrderConfirmation,
-          paymentConfirmation:com.gestionstock.notification.kafka.payment.PaymentConfirmation,
-          passwordReset:com.gestionstock.notification.kafka.auth.PasswordResetNotification
+        # Une seule ligne, sans espace apres les virgules : Spring decoupe cette
+        # chaine sur ',' puis ':' et un espace de tete rendrait le nom de classe
+        # introuvable. Un scalaire YAML replie en inserait.
+        spring.json.type.mapping: "orderConfirmation:com.gestionstock.notification.kafka.order.OrderConfirmation,paymentConfirmation:com.gestionstock.notification.kafka.payment.PaymentConfirmation,passwordReset:com.gestionstock.notification.kafka.auth.PasswordResetNotification"
   mail:
     host: ${MAIL_HOST:localhost}
     port: ${MAIL_PORT:1025}
