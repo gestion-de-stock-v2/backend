@@ -46,6 +46,28 @@ colors:
   on-tertiary-fixed: '#00174b'
   on-tertiary-fixed-variant: '#003ea8'
   background: '#faf8ff'
+  # ---------------------------------------------------------------
+  # Role Spectrum — seven mutually distinguishable identity hues.
+  # Added because the base palette offers only two chromatic families
+  # (royal blue, burnt tangerine) plus neutrals, which cannot carry a
+  # seven-way distinction on colour alone.
+  # Each base tone is text-legible on a 10% tint of itself over white
+  # (WCAG AA, >= 4.5:1); the -dark variants are the dark-theme pairings.
+  # ---------------------------------------------------------------
+  role-admin: '#be123c'
+  role-admin-dark: '#fda4af'
+  role-manager: '#1d4ed8'
+  role-manager-dark: '#93b4ff'
+  role-warehouse: '#9a3412'
+  role-warehouse-dark: '#fdba74'
+  role-sales: '#047857'
+  role-sales-dark: '#6ee7b7'
+  role-purchasing: '#6d28d9'
+  role-purchasing-dark: '#c4b5fd'
+  role-accounting: '#0e7490'
+  role-accounting-dark: '#67e8f9'
+  role-observer: '#475569'
+  role-observer-dark: '#94a3b8'
   on-background: '#131b2e'
   surface-variant: '#dae2fd'
 typography:
@@ -154,6 +176,43 @@ The palette establishes an intentional contrast between institutional trust and 
 - **Secondary Base (`#EA580C`):** Reserved for high-value focal moments: conversion-critical buttons, urgent status indicators, and notification badges.
 - **Secondary Bright (`#F97316`):** Used for micro-animations, active toggles in promotional states, and pressed states of accent buttons.
 - **Secondary Tint (`#FFF7ED`):** Backing fill for warning alerts, pending transactions, and accent badge containers.
+
+### Role Spectrum (Seven-Way Identity Coding)
+
+The base palette is deliberately narrow — two chromatic families and a neutral
+ramp — which serves layout hierarchy well but cannot encode seven mutually
+exclusive identities. Role badges therefore draw on a dedicated spectrum,
+tuned so that no two tones read alike at badge size.
+
+| Role | Base (light theme) | Dark theme | Hue |
+|---|---|---|---|
+| Administrator | `#BE123C` | `#FDA4AF` | 345° crimson |
+| Manager | `#1D4ED8` | `#93B4FF` | 224° royal blue |
+| Warehouse | `#9A3412` | `#FDBA74` | 15° burnt sienna |
+| Sales | `#047857` | `#6EE7B7` | 163° emerald |
+| Purchasing | `#6D28D9` | `#C4B5FD` | 263° violet |
+| Accounting | `#0E7490` | `#67E8F9` | 193° teal |
+| Observer | `#475569` | `#94A3B8` | neutral slate |
+
+**Constraints this spectrum satisfies**
+- **Separation:** the six chromatic tones sit at least 30° apart on the hue
+  wheel. Observer is deliberately desaturated (19%) so it reads as *absence of
+  role colour* rather than as a seventh hue.
+- **Legibility:** every base tone reaches at least 4.5:1 against a 10% tint of
+  itself over white, and every dark-theme tone reaches the same against a 20%
+  tint over `#151E31`. Measured values range from 4.67:1 to 6.53:1.
+- **Anchoring:** Manager keeps the primary blue and Warehouse a darkened
+  tangerine, so the two brand families remain the visual centre of gravity.
+
+**Application.** Role badges use the tinted-chip treatment (fill at 10% of the
+role tone, 1px border at 32%, label at full saturation) rather than a saturated
+fill with white text — the tint keeps badges quiet inside dense tables while
+preserving contrast. Pair the tone with the role's icon: colour alone must never
+be the sole carrier of meaning, for colour-vision deficiency as much as for
+print and greyscale.
+
+Re-run `tools/check-palette.py` after any change to this spectrum; it fails the
+build of trust rather than silently shipping an unreadable badge.
 
 ### Neutrals & Surfaces (Deep Slate to Off-White)
 - **Neutral Darkest (`#0F172A`):** The primary typographic ink and icon shade, offering high-legibility contrast against light canvases.

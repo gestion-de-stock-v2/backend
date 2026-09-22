@@ -76,6 +76,19 @@
   --accent-dark:        var(--accent-deep);
   --accent-light:       var(--accent-tint);
 
+  /* ---------- Spectre des rôles (DESIGN.md § Role Spectrum) ----------
+     Sept teintes mutuellement distinguables : la palette de base n'offre que
+     deux familles chromatiques, insuffisant pour coder sept identités.
+     Chaque teinte atteint au moins 4.5:1 sur un fond teinté à 10 % d'elle-même.
+     Vérifiable par : python3 tools/check-palette.py                          */
+  --role-admin:       #BE123C;  /* 345° cramoisi   */
+  --role-manager:     #1D4ED8;  /* 224° bleu royal */
+  --role-warehouse:   #9A3412;  /*  15° terre brûlée */
+  --role-sales:       #047857;  /* 163° émeraude   */
+  --role-purchasing:  #6D28D9;  /* 263° violet     */
+  --role-accounting:  #0E7490;  /* 193° sarcelle   */
+  --role-observer:    #475569;  /* neutre ardoise  */
+
   /* ---------- Sémantiques ---------- */
   --success:            #15803D;
   --success-tint:       #F0FDF4;
@@ -154,6 +167,15 @@ body.dark {
   --bg-header-chip:     rgba(255, 255, 255, .08);
   --text-faint:         #6B7C93;
   --text-inverse:       #0B1220;
+
+  /* Spectre des rôles, variantes sombres (cf. DESIGN.md). */
+  --role-admin:       #FDA4AF;
+  --role-manager:     #93B4FF;
+  --role-warehouse:   #FDBA74;
+  --role-sales:       #6EE7B7;
+  --role-purchasing:  #C4B5FD;
+  --role-accounting:  #67E8F9;
+  --role-observer:    #94A3B8;
 
   --success:            #4ADE80;
   --success-tint:       #10301E;

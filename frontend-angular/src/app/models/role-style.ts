@@ -4,22 +4,25 @@ import { Role } from './user.model';
  * Apparence des rôles, définie une seule fois.
  *
  * Ces tables étaient auparavant recopiées dans quatre composants, avec des
- * valeurs hexadécimales divergentes et hors charte (un violet #9333ea n'existe
- * nulle part dans DESIGN.md). Tout passe désormais par les tokens.
+ * valeurs hexadécimales divergentes et hors charte. Tout passe désormais par
+ * les tokens du spectre des rôles, documenté dans DESIGN.md § Role Spectrum :
+ * sept teintes séparées d'au moins 30° sur la roue, chacune lisible sur le fond
+ * teinté de la pastille (≥ 4.5:1 en clair comme en sombre).
  *
- * La charte ne propose que deux familles chromatiques (bleu, orange) plus les
- * neutres et deux teintes sémantiques : sept teintes franchement distinctes n'y
- * sont pas disponibles. La couleur seule ne peut donc pas porter la distinction
- * entre rôles — d'où l'icône, systématiquement affichée à côté du libellé.
+ * L'icône reste affichée à côté du libellé : la couleur ne doit jamais être le
+ * seul vecteur de sens, pour les déficiences de vision des couleurs comme pour
+ * l'impression en niveaux de gris.
+ *
+ * Toute modification de ces teintes doit repasser `tools/check-palette.py`.
  */
 export const ROLE_COLORS: Record<Role, string> = {
-  ADMIN:       'var(--danger)',
-  GERANT:      'var(--primary-deep)',
-  MAGASINIER:  'var(--accent)',
-  VENDEUR:     'var(--success)',
-  ACHETEUR:    'var(--primary-bright)',
-  COMPTABLE:   'var(--accent-deep)',
-  OBSERVATEUR: 'var(--ink-muted)',
+  ADMIN:       'var(--role-admin)',
+  GERANT:      'var(--role-manager)',
+  MAGASINIER:  'var(--role-warehouse)',
+  VENDEUR:     'var(--role-sales)',
+  ACHETEUR:    'var(--role-purchasing)',
+  COMPTABLE:   'var(--role-accounting)',
+  OBSERVATEUR: 'var(--role-observer)',
 };
 
 export const ROLE_ICONS: Record<Role, string> = {
