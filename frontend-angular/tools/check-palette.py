@@ -12,7 +12,7 @@ Deux proprietes sont controlees :
      les unes des autres sur la roue, sans quoi deux roles deviennent
      indiscernables a la taille d'un badge.
 
-Usage :  python3 tools/check-palette.py
+Usage :  python3 tools/check-palette.py   (depuis frontend-angular/)
 Sortie :  code 0 si tout passe, 1 sinon.
 """
 
@@ -20,8 +20,10 @@ import re
 import sys
 from pathlib import Path
 
-DESIGN = Path(__file__).resolve().parent.parent / "DESIGN.md"
-STYLES = Path(__file__).resolve().parent.parent / "frontend-angular" / "src" / "styles.css"
+# Le script vit dans frontend-angular/tools/ : la racine du projet est un cran au-dessus.
+ROOT = Path(__file__).resolve().parent.parent
+DESIGN = ROOT / "DESIGN.md"
+STYLES = ROOT / "src" / "styles.css"
 
 MIN_RATIO = 4.5      # WCAG AA pour du texte de petite taille
 MIN_HUE_GAP = 25     # degres
