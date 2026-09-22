@@ -3,28 +3,52 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { IconComponent } from '../../components/icon/icon.component';
-import { ThemeToggleComponent } from '../../components/theme-toggle/theme-toggle.component';
 import { Role } from '../../models/user.model';
+
+interface NavItem {
+  path: string;
+  icon: string;
+  label: string;
+  adminOnly?: boolean;
+}
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, IconComponent, ThemeToggleComponent],
+  imports: [CommonModule, RouterLink, RouterLinkActive, IconComponent],
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent {
+  /** Teintes de rôle issues de la charte (primaire, accent, sémantiques). */
   roleColors: Record<Role, string> = {
-    ADMIN:       '#dc2626',
-    GERANT:      '#2563eb',
-    MAGASINIER:  '#d97706',
-    VENDEUR:     '#16a34a',
-    ACHETEUR:    '#4f46e5',
-    COMPTABLE:   '#9333ea',
-    OBSERVATEUR: '#64748b'
+    ADMIN:       'var(--danger)',
+    GERANT:      'var(--primary)',
+    MAGASINIER:  'var(--accent)',
+    VENDEUR:     'var(--success)',
+    ACHETEUR:    'var(--primary-bright)',
+    COMPTABLE:   'var(--accent-bright)',
+    OBSERVATEUR: 'var(--ink-muted)',
   };
 
+  nav: NavItem[] = [
+    { path: '/dashboard',    icon: 'dashboard', label: 'Tableau de bord' },
+    { path: '/produtos',     icon: 'box',       label: 'Produits & Stock' },
+    { path: '/categories',   icon: 'tag',       label: 'Catégories' },
+    { path: '/fornecedores', icon: 'truck',     label: 'Fournisseurs' },
+    { path: '/mouvements',   icon: 'swap',      label: 'Mouvements' },
+    { path: '/customers',    icon: 'users',     label: 'Clients' },
+    { path: '/orders',       icon: 'cart',      label: 'Commandes' },
+    { path: '/payments',     icon: 'key',       label: 'Paiements' },
+    { path: '/usuarios',     icon: 'shield',    label: 'Utilisateurs', adminOnly: true },
+    { path: '/settings',     icon: 'settings',  label: 'Paramètres' },
+  ];
+
   constructor(public auth: AuthService) {}
+
+  get visibleNav(): NavItem[] {
+    return this.nav.filter(i => !i.adminOnly || this.auth.isAdmin());
+  }
 
   getRoleColor(role: Role): string {
     return this.roleColors[role];

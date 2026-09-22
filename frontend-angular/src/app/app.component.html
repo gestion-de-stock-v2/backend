@@ -1,5 +1,26 @@
-<app-header *ngIf="auth.isLoggedIn()"></app-header>
+<!-- Coque applicative : uniquement sur les écrans authentifiés -->
+<ng-container *ngIf="!isPublic()">
 
-<main class="app-main">
+  <!-- Barre supérieure. La bascule de thème y est ancrée a l'extrémité droite,
+       volontairement hors du menu latéral. -->
+  <div class="topbar">
+    <button class="nav-toggle" type="button" (click)="toggleNav()"
+            [attr.aria-expanded]="navOpen()" aria-controls="app-sidebar"
+            aria-label="Ouvrir le menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="topbar-spacer"></div>
+
+    <app-theme-toggle></app-theme-toggle>
+  </div>
+
+  <app-header [class.is-open]="navOpen()"></app-header>
+
+  <!-- Voile de fermeture du tiroir sur mobile -->
+  <div class="nav-scrim" *ngIf="navOpen()" (click)="toggleNav()"></div>
+</ng-container>
+
+<main class="app-main" [class.is-public]="isPublic()">
   <router-outlet />
 </main>

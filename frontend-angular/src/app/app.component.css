@@ -1,19 +1,78 @@
-.app-main {
-  margin-right: 260px;
-  padding: 2rem;
-  max-width: calc(1400px - 260px);
-  transition: margin-right .3s ease;
+/* ============================================================
+   BARRE SUPÉRIEURE
+   Occupe l'espace à droite du menu latéral et accueille la bascule
+   de thème, placée à l'extrémité droite de l'écran.
+   ============================================================ */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  z-index: 40;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0 var(--space-lg);
+  background: rgba(248, 250, 252, .92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: left .3s ease;
 }
 
-@media (max-width: 900px) {
-  .app-main {
-    margin-right: 220px;
-  }
+.dark .topbar { background: rgba(11, 18, 32, .92); }
+
+.topbar-spacer { flex: 1; }
+
+/* Bouton hamburger : masqué tant que le menu est ancré. */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer;
 }
 
-@media (max-width: 720px) {
-  .app-main {
-    margin-right: 0;
-    padding: 1rem;
-  }
+.nav-toggle span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  margin: 0 auto;
+  border-radius: var(--r-full);
+  background: var(--ink);
+  transition: transform .2s ease, opacity .2s ease;
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Voile affiché derrière le tiroir de navigation sur mobile */
+.nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: var(--scrim);
+  animation: scrim-in .2s ease;
+}
+
+@keyframes scrim-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Le contenu laisse la place à la barre supérieure. */
+.app-main:not(.is-public) { padding-top: calc(var(--topbar-h) + var(--space-lg)); }
+
+@media (max-width: 1100px) {
+  .topbar { left: var(--sidebar-w-md); }
+}
+
+@media (max-width: 860px) {
+  .topbar { left: 0; padding: 0 var(--gutter); }
+  .nav-toggle { display: flex; }
 }

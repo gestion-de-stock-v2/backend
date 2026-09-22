@@ -7,6 +7,13 @@ export const routes: Routes = [
   // PUBLIC (non authentifié)
   // ============================================================
   {
+    // Page d'accueil publique : présente le produit et oriente vers
+    // la connexion ou la création de compte.
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent)
+  },
+  {
     path: 'login',
     loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent)
   },
@@ -96,7 +103,6 @@ export const routes: Routes = [
   },
 
 
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   {
     path: '404',
     loadComponent: () => import('./pages/not-found/not-found.component').then(m => m.NotFoundComponent)

@@ -48,8 +48,8 @@
           <app-icon name="lock" [size]="18" class="input-icon"></app-icon>
           <input [(ngModel)]="password" name="password"
                  [type]="showPassword ? 'text' : 'password'"
-                 placeholder="6 caractères minimum"
-                 required minlength="6" autocomplete="new-password" />
+                 placeholder="8 caractères minimum"
+                 required minlength="8" autocomplete="new-password" />
           <button type="button" class="toggle-pwd" (click)="showPassword = !showPassword">
             <app-icon [name]="showPassword ? 'eyeOff' : 'eye'" [size]="18"></app-icon>
           </button>
@@ -80,10 +80,12 @@
       </div>
 
       <p class="role-notice">
-          Votre compte est cree avec un acces en lecture seule.
-          Un administrateur pourra ensuite vous attribuer un role.
-        </p>
-      
+        <app-icon name="info" [size]="16"></app-icon>
+        <span>
+          Votre compte est créé avec un accès en lecture seule.
+          Un administrateur pourra ensuite vous attribuer un rôle.
+        </span>
+      </p>
 
       <p *ngIf="error" class="erro">
         <app-icon name="alert" [size]="16"></app-icon>

@@ -1,0 +1,154 @@
+<div class="landing">
+
+  <!-- ============================================================
+       EN-TÊTE
+       ============================================================ -->
+  <header class="lp-header">
+    <a routerLink="/" class="lp-brand">
+      <svg viewBox="0 0 48 48" width="32" height="32" aria-hidden="true"
+           xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="40" height="40" rx="12" fill="#fff"/>
+        <path d="M14 20 L24 15 L34 20 L34 30 L24 35 L14 30 Z" fill="none" stroke="#1D4ED8"
+              stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="M14 20 L24 25 L34 20" fill="none" stroke="#1D4ED8" stroke-width="2.5"
+              stroke-linejoin="round"/>
+        <line x1="24" y1="25" x2="24" y2="35" stroke="#1D4ED8" stroke-width="2.5"/>
+      </svg>
+      <span>Gestion de Stock</span>
+    </a>
+
+    <div class="lp-header-actions">
+      <app-theme-toggle class="on-dark"></app-theme-toggle>
+
+      <ng-container *ngIf="auth.isLoggedIn(); else anonymous">
+        <a routerLink="/dashboard" class="lp-btn lp-btn-light">
+          Ouvrir l'application
+        </a>
+      </ng-container>
+      <ng-template #anonymous>
+        <a routerLink="/login" class="lp-btn lp-btn-ghost">Connexion</a>
+        <a routerLink="/signup" class="lp-btn lp-btn-accent">Créer un compte</a>
+      </ng-template>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       HÉROS
+       ============================================================ -->
+  <section class="lp-hero">
+    <div class="lp-hero-inner">
+      <p class="lp-eyebrow">Plateforme de gestion d'inventaire</p>
+
+      <h1 class="lp-title">
+        Votre stock, <span class="lp-title-accent">juste</span><br />
+        et à jour en permanence.
+      </h1>
+
+      <p class="lp-lead">
+        Suivez produits, fournisseurs, mouvements et commandes depuis une seule
+        interface. Chaque quantité affichée est la quantité réelle — le décrément
+        de stock est protégé contre la survente et compensé en cas d'échec.
+      </p>
+
+      <div class="lp-cta">
+        <ng-container *ngIf="auth.isLoggedIn(); else ctaAnonymous">
+          <a routerLink="/dashboard" class="lp-btn lp-btn-accent lp-btn-lg">
+            <app-icon name="dashboard" [size]="18" />
+            <span>Accéder au tableau de bord</span>
+          </a>
+        </ng-container>
+        <ng-template #ctaAnonymous>
+          <a routerLink="/signup" class="lp-btn lp-btn-accent lp-btn-lg">
+            <app-icon name="plus" [size]="18" />
+            <span>Commencer gratuitement</span>
+          </a>
+          <a routerLink="/login" class="lp-btn lp-btn-light lp-btn-lg">
+            <app-icon name="login" [size]="18" />
+            <span>J'ai déjà un compte</span>
+          </a>
+        </ng-template>
+      </div>
+
+      <dl class="lp-stats">
+        <div class="lp-stat" *ngFor="let s of stats">
+          <dt>{{ s.value }}</dt>
+          <dd>{{ s.label }}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Aperçu d'interface, dessiné en CSS : aucune image à charger. -->
+    <div class="lp-preview" aria-hidden="true">
+      <div class="lp-window">
+        <div class="lp-window-bar">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="lp-window-body">
+          <div class="lp-kpi-row">
+            <div class="lp-kpi"><b>248</b><small>Produits</small></div>
+            <div class="lp-kpi warn"><b>7</b><small>Stock faible</small></div>
+            <div class="lp-kpi ok"><b>1 204</b><small>Unités</small></div>
+          </div>
+          <div class="lp-rows">
+            <div class="lp-row" *ngFor="let w of [78, 52, 91, 35, 64]">
+              <span class="lp-row-name"></span>
+              <span class="lp-row-bar"><i [style.width.%]="w"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FONCTIONNALITÉS
+       ============================================================ -->
+  <section class="lp-section" id="fonctionnalites">
+    <div class="lp-section-head">
+      <h2>Ce que l'application prend en charge</h2>
+      <p>Du référentiel produit au paiement confirmé, sans ressaisie ni tableur parallèle.</p>
+    </div>
+
+    <div class="lp-features">
+      <article class="lp-feature" *ngFor="let f of features">
+        <span class="lp-feature-icon"><app-icon [name]="f.icon" [size]="20" /></span>
+        <h3>{{ f.title }}</h3>
+        <p>{{ f.text }}</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       APPEL À L'ACTION FINAL
+       ============================================================ -->
+  <section class="lp-final">
+    <div class="lp-final-card">
+      <h2>Prêt à reprendre la main sur votre inventaire ?</h2>
+      <p>
+        Création de compte immédiate. Vous démarrez en lecture seule ; un
+        administrateur vous attribue ensuite le rôle correspondant à votre poste.
+      </p>
+      <div class="lp-cta">
+        <a *ngIf="!auth.isLoggedIn()" routerLink="/signup" class="lp-btn lp-btn-accent lp-btn-lg">
+          <app-icon name="plus" [size]="18" /><span>Créer mon compte</span>
+        </a>
+        <a *ngIf="auth.isLoggedIn()" routerLink="/dashboard" class="lp-btn lp-btn-accent lp-btn-lg">
+          <app-icon name="dashboard" [size]="18" /><span>Ouvrir le tableau de bord</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PIED DE PAGE
+       ============================================================ -->
+  <footer class="lp-footer">
+    <p>Gestion de Stock — plateforme d'inventaire et de commandes.</p>
+    <nav>
+      <a routerLink="/login">Connexion</a>
+      <a routerLink="/signup">Créer un compte</a>
+      <a routerLink="/forgot-password">Mot de passe oublié</a>
+    </nav>
+  </footer>
+
+</div>

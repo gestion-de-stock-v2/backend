@@ -22,8 +22,7 @@
               }
             ],
             "styles": [
-              "src/styles.css",
-              "src/styles-dark.css"
+              "src/styles.css"
             ]
           },
           "configurations": {
