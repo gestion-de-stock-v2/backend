@@ -11,21 +11,21 @@ import { IconComponent } from '../../components/icon/icon.component';
     <div class="nf-wrap">
       <div class="nf-card">
         <div class="nf-icon">
-          <app-icon name="warning" [size]="40" />
+          <app-icon name="alert" [size]="40" />
         </div>
-        <h1>404</h1>
-        <p class="nf-sub">Page introuvable</p>
+        <p class="nf-code">404</p>
+        <h1>Page introuvable</h1>
         <p class="nf-text">
           La page que vous recherchez n'existe pas ou a été déplacée.
         </p>
         <div class="nf-actions">
           <a routerLink="/dashboard" class="btn-primary">
-            <app-icon name="home" [size]="18" />
-            Retour à l'accueil
+            <app-icon name="dashboard" [size]="18" />
+            <span>Tableau de bord</span>
           </a>
-          <a routerLink="/about" class="btn-secondary">
+          <a routerLink="/" class="btn-secondary">
             <app-icon name="info" [size]="18" />
-            À propos
+            <span>Accueil</span>
           </a>
         </div>
       </div>
@@ -33,43 +33,61 @@ import { IconComponent } from '../../components/icon/icon.component';
   `,
   styles: [`
     .nf-wrap {
-      min-height: calc(100vh - 70px);
-      display: flex; align-items: center; justify-content: center;
-      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-xl) var(--gutter);
+      background: var(--surface);
     }
+
     .nf-card {
-      text-align: center;
-      background: var(--ds-card);
-      border: 1px solid var(--ds-border);
-      border-radius: 16px;
-      box-shadow: 0 12px 40px rgba(77,107,254,0.10);
-      padding: 48px 40px;
+      width: 100%;
       max-width: 480px;
+      padding: clamp(1.75rem, 5vw, 3rem);
+      text-align: center;
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      box-shadow: var(--elev-2);
     }
+
     .nf-icon {
-      width: 80px; height: 80px; border-radius: 20px;
-      background: #FEF2F2; color: #EF4444;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--space-md);
+      border-radius: var(--r-lg);
+      background: var(--accent-tint);
+      color: var(--accent);
     }
-    html.dark .nf-icon { background: #7F1D1D; color: #FCA5A5; }
-    .nf-card h1 {
-      margin: 0; font-size: 64px; font-weight: 800; letter-spacing: -2px;
-      background: var(--ds-gradient);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
+
+    .nf-code {
+      margin: 0;
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--primary);
     }
-    .nf-sub { margin: 6px 0 16px; font-size: 18px; font-weight: 600; }
-    .nf-text { margin: 0 0 28px; color: var(--ds-text-muted); }
-    .nf-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-    .btn-primary, .btn-secondary {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 18px; border-radius: 10px;
-      text-decoration: none; font-weight: 600; font-size: 14px;
+
+    .nf-card h1 { margin: var(--space-sm) 0; font-size: 22px; font-weight: 700; }
+    .nf-text { margin: 0 0 var(--space-xl); font-size: 14px; color: var(--ink-muted); }
+
+    .nf-actions {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: center;
+      flex-wrap: wrap;
     }
-    .btn-primary { background: var(--ds-gradient); color: #fff; }
-    .btn-secondary { background: #F3F4F6; color: var(--ds-text); }
-    html.dark .btn-secondary { background: #334155; color: #F1F5F9; }
-  `]
+    .nf-actions a { text-decoration: none; }
+
+    @media (max-width: 480px) {
+      .nf-actions { flex-direction: column; }
+      .nf-actions a { width: 100%; }
+    }
+  `],
 })
 export class NotFoundComponent {}

@@ -3,130 +3,109 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../components/icon/icon.component';
 
+interface Feature {
+  icon: string;
+  title: string;
+  text: string;
+}
+
 @Component({
   selector: 'app-about',
   standalone: true,
   imports: [CommonModule, RouterLink, IconComponent],
   template: `
     <div class="about-hero">
-      <div class="about-logo">
-        <app-icon name="cube" [size]="36" />
-      </div>
+      <div class="about-logo"><app-icon name="box" [size]="36" /></div>
       <h1>Gestion de Stock</h1>
       <p class="about-lead">
-        Application complète de gestion de stock — produits, catégories, fournisseurs et mouvements.
+        Plateforme d'inventaire et de commandes : produits, catégories,
+        fournisseurs, mouvements, clients, commandes et paiements.
       </p>
     </div>
 
     <div class="about-grid">
-      <div class="feature">
-        <app-icon name="cube" [size]="22" />
-        <h3>Produits</h3>
-        <p>Gérez votre catalogue avec prix, stock, catégorie et fournisseur associés.</p>
-      </div>
-      <div class="feature">
-        <app-icon name="tag" [size]="22" />
-        <h3>Catégories</h3>
-        <p>Organisez vos produits par catégories pour un suivi plus clair.</p>
-      </div>
-      <div class="feature">
-        <app-icon name="building" [size]="22" />
-        <h3>Fournisseurs</h3>
-        <p>Centralisez les coordonnées de vos fournisseurs et leurs produits.</p>
-      </div>
-      <div class="feature">
-        <app-icon name="exchange" [size]="22" />
-        <h3>Mouvements</h3>
-        <p>Enregistrez les entrées et sorties de stock avec vérification automatique.</p>
-      </div>
-      <div class="feature">
-        <app-icon name="chart" [size]="22" />
-        <h3>Tableau de bord</h3>
-        <p>Visualisez vos totaux en un coup d'œil : produits, catégories, stock.</p>
-      </div>
-      <div class="feature">
-        <app-icon name="pin" [size]="22" />
-        <h3>Géolocalisation</h3>
-        <p>Détectez automatiquement votre position et la météo locale en temps réel.</p>
-      </div>
-      <div class="feature">
-        <app-icon name="moon" [size]="22" />
-        <h3>Mode sombre</h3>
-        <p>Basculez entre thème clair et sombre selon vos préférences.</p>
-      </div>
-      <div class="feature">
-        <app-icon name="cog" [size]="22" />
-        <h3>API REST</h3>
-        <p>Backend Spring Boot, base MySQL, DTO, validation et gestion d'erreurs.</p>
-      </div>
+      <article class="feature" *ngFor="let f of features">
+        <app-icon [name]="f.icon" [size]="22" />
+        <h3>{{ f.title }}</h3>
+        <p>{{ f.text }}</p>
+      </article>
     </div>
 
     <div class="about-cta">
       <a routerLink="/dashboard" class="btn-primary">
         <app-icon name="dashboard" [size]="18" />
-        Aller au tableau de bord
-      </a>
-      <a routerLink="/login" class="btn-secondary">
-        <app-icon name="login" [size]="18" />
-        Se connecter
+        <span>Aller au tableau de bord</span>
       </a>
     </div>
   `,
   styles: [`
-    .about-hero { text-align: center; padding: 20px 0 40px; }
+    .about-hero { text-align: center; padding: var(--space-md) 0 var(--space-xl); }
+
     .about-logo {
-      width: 80px; height: 80px; border-radius: 20px;
-      background: var(--ds-gradient);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; margin: 0 auto 20px;
-      box-shadow: 0 12px 32px rgba(77,107,254,0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--space-md);
+      border-radius: var(--r-lg);
+      background: var(--primary);
+      color: #fff;
+      box-shadow: var(--elev-2);
     }
-    .about-hero h1 { margin: 0 0 12px 0; font-size: 32px; letter-spacing: -0.5px; }
+
+    .about-hero h1 { margin: 0 0 var(--space-sm); }
     .about-lead {
-      margin: 0 auto; max-width: 560px;
-      color: var(--ds-text-muted); font-size: 16px;
+      max-width: 60ch;
+      margin: 0 auto;
+      font-size: 16px;
+      line-height: 24px;
+      color: var(--ink-muted);
     }
+
     .about-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      margin-bottom: 40px;
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
     }
+
     .feature {
-      background: var(--ds-card);
-      border: 1px solid var(--ds-border);
-      border-radius: var(--ds-radius);
-      padding: 24px;
-      box-shadow: var(--ds-shadow);
-      transition: transform 0.2s, box-shadow 0.2s;
+      padding: var(--space-lg);
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--elev-1);
+      transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
     }
     .feature:hover {
+      border-color: var(--primary-soft);
+      box-shadow: var(--elev-2);
       transform: translateY(-3px);
-      box-shadow: 0 12px 28px rgba(77,107,254,0.12);
     }
-    .feature app-icon { color: var(--ds-primary); }
-    .feature h3 { margin: 12px 0 8px; font-size: 16px; }
-    .feature p { margin: 0; color: var(--ds-text-muted); font-size: 14px; line-height: 1.5; }
 
-    .about-cta {
-      display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
-      padding: 24px;
+    .feature app-icon { color: var(--primary); }
+    .feature h3 { margin: var(--space-sm) 0 6px; font-size: 16px; }
+    .feature p { margin: 0; font-size: 14px; line-height: 21px; color: var(--ink-muted); }
+
+    .about-cta { display: flex; justify-content: center; padding-bottom: var(--space-xl); }
+    .about-cta a { text-decoration: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .feature:hover { transform: none; }
     }
-    .btn-primary, .btn-secondary {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 12px 22px; border-radius: 10px;
-      text-decoration: none; font-weight: 600; font-size: 14px;
-      transition: transform 0.1s;
-    }
-    .btn-primary {
-      background: var(--ds-gradient); color: #fff;
-      box-shadow: 0 4px 16px rgba(77,107,254,0.28);
-    }
-    .btn-secondary {
-      background: #F3F4F6; color: var(--ds-text);
-    }
-    html.dark .btn-secondary { background: #334155; color: #F1F5F9; }
-    .btn-primary:hover, .btn-secondary:hover { transform: translateY(-1px); }
-  `]
+  `],
 })
-export class AboutComponent {}
+export class AboutComponent {
+  /** Toutes les icônes référencées existent dans IconComponent. */
+  features: Feature[] = [
+    { icon: 'box',      title: 'Produits',        text: 'Catalogue avec prix, quantité disponible, catégorie et fournisseur associés.' },
+    { icon: 'tag',      title: 'Catégories',      text: 'Organisation du catalogue pour un suivi lisible par famille de produits.' },
+    { icon: 'truck',    title: 'Fournisseurs',    text: 'Coordonnées centralisées et rattachement aux produits approvisionnés.' },
+    { icon: 'swap',     title: 'Mouvements',      text: "Entrées et sorties historisées, avec contrôle du stock disponible." },
+    { icon: 'users',    title: 'Clients',         text: 'Référentiel clients utilisé lors de la création des commandes.' },
+    { icon: 'cart',     title: 'Commandes',       text: 'Décrément de stock protégé contre la survente, compensé en cas d\'échec.' },
+    { icon: 'shield',   title: 'Rôles et droits', text: 'Sept rôles métier, vérifiés côté serveur et non seulement masqués à l\'écran.' },
+    { icon: 'mail',     title: 'Notifications',   text: 'Confirmations de commande et de paiement envoyées automatiquement par e-mail.' },
+  ];
+}
