@@ -22,7 +22,7 @@
         <app-icon name="users" [size]="22"></app-icon>
       </div>
       <div>
-        <span class="stat-value">{{ usuarios.length }}</span>
+        <span class="stat-value">{{ users.length }}</span>
         <span class="stat-label">Total</span>
       </div>
     </div>
@@ -31,7 +31,7 @@
         <app-icon name="check" [size]="22"></app-icon>
       </div>
       <div>
-        <span class="stat-value">{{ actifs }}</span>
+        <span class="stat-value">{{ activeCount }}</span>
         <span class="stat-label">Actifs</span>
       </div>
     </div>
@@ -40,7 +40,7 @@
         <app-icon name="close" [size]="22"></app-icon>
       </div>
       <div>
-        <span class="stat-value">{{ inactifs }}</span>
+        <span class="stat-value">{{ inactiveCount }}</span>
         <span class="stat-label">Inactifs</span>
       </div>
     </div>
@@ -62,13 +62,13 @@
       <h3>Créer un nouvel utilisateur</h3>
     </div>
 
-    <form (ngSubmit)="creer()" class="user-form">
+    <form (ngSubmit)="create()" class="user-form">
       <div class="form-row">
         <div class="form-group">
           <label>Nom d'utilisateur <span class="required">*</span></label>
           <div class="input-wrapper">
             <app-icon name="key" [size]="16" class="input-icon"></app-icon>
-            <input [(ngModel)]="novo.username" name="username"
+            <input [(ngModel)]="draft.username" name="username"
                    placeholder="ex: jean.dupont" required minlength="3" autocomplete="off" />
           </div>
         </div>
@@ -77,7 +77,7 @@
           <label>Nom complet <span class="required">*</span></label>
           <div class="input-wrapper">
             <app-icon name="user" [size]="16" class="input-icon"></app-icon>
-            <input [(ngModel)]="novo.nome" name="nome"
+            <input [(ngModel)]="draft.name" name="name"
                    placeholder="ex: Jean Dupont" required />
           </div>
         </div>
@@ -88,7 +88,7 @@
           <label>Email <span class="required">*</span></label>
           <div class="input-wrapper">
             <app-icon name="mail" [size]="16" class="input-icon"></app-icon>
-            <input [(ngModel)]="novo.email" name="email" type="email"
+            <input [(ngModel)]="draft.email" name="email" type="email"
                    placeholder="ex: jean@estoque.com" required />
           </div>
         </div>
@@ -97,7 +97,7 @@
           <label>Mot de passe <span class="required">*</span></label>
           <div class="input-wrapper">
             <app-icon name="lock" [size]="16" class="input-icon"></app-icon>
-            <input [(ngModel)]="novo.password" name="password"
+            <input [(ngModel)]="draft.password" name="password"
                    [type]="showPassword ? 'text' : 'password'"
                    placeholder="6 caractères minimum" required minlength="6" autocomplete="new-password" />
             <button type="button" class="toggle-pwd" (click)="showPassword = !showPassword">
@@ -113,17 +113,17 @@
           <label *ngFor="let r of roles"
                  class="role-option"
                  [style.--role-color]="getRoleColor(r)"
-                 [class.selected]="novo.role === r">
-            <input type="radio" name="role" [value]="r" [(ngModel)]="novo.role" hidden />
+                 [class.selected]="draft.role === r">
+            <input type="radio" name="role" [value]="r" [(ngModel)]="draft.role" hidden />
             <app-icon [name]="getRoleIcon(r)" [size]="20"></app-icon>
             <span class="role-label">{{ r }}</span>
           </label>
         </div>
       </div>
 
-      <p *ngIf="erro" class="msg-error">
+      <p *ngIf="error" class="msg-error">
         <app-icon name="alert" [size]="16"></app-icon>
-        <span>{{ erro }}</span>
+        <span>{{ error }}</span>
       </p>
 
       <div class="form-actions">
@@ -146,16 +146,16 @@
   </p>
 
   <!-- Message d'erreur global -->
-  <p *ngIf="erro && !showForm" class="msg-error">
+  <p *ngIf="error && !showForm" class="msg-error">
     <app-icon name="alert" [size]="16"></app-icon>
-    <span>{{ erro }}</span>
+    <span>{{ error }}</span>
   </p>
 
   <!-- Liste des utilisateurs -->
   <div class="card">
     <div class="card-header">
       <app-icon name="users" [size]="20"></app-icon>
-      <h3>Tous les utilisateurs ({{ usuarios.length }})</h3>
+      <h3>Tous les utilisateurs ({{ users.length }})</h3>
     </div>
 
     <table class="table users-table">
@@ -170,7 +170,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let u of usuarios" [class.inactive]="!u.actif">
+      <tr *ngFor="let u of users" [class.inactive]="!u.active">
         <td>
           <div class="user-cell">
               <span class="user-avatar-sm" [style.background]="getRoleColor(u.role)">
@@ -180,7 +180,7 @@
             <span class="self-tag" *ngIf="u.username === auth.currentUser()?.username">(vous)</span>
           </div>
         </td>
-        <td>{{ u.nome }}</td>
+        <td>{{ u.name }}</td>
         <td class="email-cell">
           <app-icon name="mail" [size]="14"></app-icon>
           <span>{{ u.email }}</span>
@@ -191,22 +191,22 @@
             </span>
         </td>
         <td>
-            <span class="status-pill" [class.active]="u.actif" [class.inactive]="!u.actif">
-              <app-icon [name]="u.actif ? 'check' : 'close'" [size]="12"></app-icon>
-              {{ u.actif ? 'Actif' : 'Désactivé' }}
+            <span class="status-pill" [class.active]="u.active" [class.inactive]="!u.active">
+              <app-icon [name]="u.active ? 'check' : 'close'" [size]="12"></app-icon>
+              {{ u.active ? 'Actif' : 'Désactivé' }}
             </span>
         </td>
         <td class="actions-cell">
-          <button class="btn-icon" (click)="toggleActif(u)" title="{{ u.actif ? 'Désactiver' : 'Activer' }}">
-            <app-icon [name]="u.actif ? 'eyeOff' : 'eye'" [size]="16"></app-icon>
+          <button class="btn-icon" (click)="toggleActive(u)" title="{{ u.active ? 'Désactiver' : 'Activer' }}">
+            <app-icon [name]="u.active ? 'eyeOff' : 'eye'" [size]="16"></app-icon>
           </button>
-          <button class="btn-icon danger" (click)="excluir(u)" title="Supprimer"
+          <button class="btn-icon danger" (click)="remove(u)" title="Supprimer"
                   [disabled]="u.username === auth.currentUser()?.username">
             <app-icon name="trash" [size]="16"></app-icon>
           </button>
         </td>
       </tr>
-      <tr *ngIf="usuarios.length === 0">
+      <tr *ngIf="users.length === 0">
         <td colspan="6" class="empty-row">
           <app-icon name="users" [size]="24"></app-icon>
           <p>Aucun utilisateur trouvé</p>

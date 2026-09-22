@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { IconComponent } from '../../components/icon/icon.component';
 import { ThemeToggleComponent } from '../../components/theme-toggle/theme-toggle.component';
-import { Role } from '../../models/usuario.model';
+import { Role } from '../../models/user.model';
 
 @Component({
   selector: 'app-header',

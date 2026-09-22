@@ -16,24 +16,29 @@ export class ForgotPasswordComponent {
   email = '';
   loading = false;
   sent = false;
-  devLink = '';
-  erro = '';
+  message = '';
+  error = '';
 
   constructor(private auth: AuthService) {}
 
-  envoyer(): void {
-    this.erro = '';
+  /**
+   * Le serveur ne renvoie plus ni jeton ni lien de reinitialisation : ceux-ci ne
+   * transitent que par e-mail. L'ecran se contente donc d'afficher le message
+   * generique, identique que le compte existe ou non.
+   */
+  send(): void {
+    this.error = '';
     this.loading = true;
     this.auth.forgotPassword(this.email).subscribe({
-      next: (res) => {
+      next: res => {
         this.loading = false;
         this.sent = true;
-        this.devLink = res?.devResetLink || '';
+        this.message = res?.message || '';
       },
-      error: (e) => {
+      error: e => {
         this.loading = false;
-        this.erro = e?.error?.message || 'Erreur lors de l\'envoi';
-      }
+        this.error = e?.error?.message || "Erreur lors de l'envoi";
+      },
     });
   }
 }

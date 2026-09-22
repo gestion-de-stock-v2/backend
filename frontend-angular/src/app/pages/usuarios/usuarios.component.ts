@@ -2,76 +2,64 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { Role, Usuario } from '../../models/usuario.model';
+import { switchMap } from 'rxjs';
+import { Role, User } from '../../models/user.model';
 import { IconComponent } from '../../components/icon/icon.component';
 import { AuthService } from '../../services/auth.service';
 
-interface NouvelUtilisateur {
+interface NewUserForm {
   username: string;
   password: string;
-  nome: string;
+  name: string;
   email: string;
   role: Role;
 }
+
+const EMPTY_FORM: NewUserForm = {
+  username: '', password: '', name: '', email: '', role: 'OBSERVATEUR',
+};
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
   imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './usuarios.component.html',
-  styleUrls: ['./usuarios.component.css']
-
+  styleUrls: ['./usuarios.component.css'],
 })
 export class UsuariosComponent implements OnInit {
-  usuarios: Usuario[] = [];
+  private readonly usersUrl = '/api/v1/users';
+  private readonly registerUrl = '/api/v1/auth/register';
+
+  users: User[] = [];
   roles: Role[] = ['ADMIN', 'GERANT', 'MAGASINIER', 'VENDEUR', 'ACHETEUR', 'COMPTABLE', 'OBSERVATEUR'];
 
   roleIcons: Record<Role, string> = {
-    ADMIN:       'crown',
-    GERANT:      'briefcase',
-    MAGASINIER:  'package',
-    VENDEUR:     'cart',
-    ACHETEUR:    'shoppingBag',
-    COMPTABLE:   'chart',
-    OBSERVATEUR: 'eye'
+    ADMIN: 'crown', GERANT: 'briefcase', MAGASINIER: 'package', VENDEUR: 'cart',
+    ACHETEUR: 'shoppingBag', COMPTABLE: 'chart', OBSERVATEUR: 'eye',
   };
 
   roleColors: Record<Role, string> = {
-    ADMIN:       '#dc2626',
-    GERANT:      '#2563eb',
-    MAGASINIER:  '#d97706',
-    VENDEUR:     '#16a34a',
-    ACHETEUR:    '#4f46e5',
-    COMPTABLE:   '#9333ea',
-    OBSERVATEUR: '#64748b'
+    ADMIN: '#dc2626', GERANT: '#2563eb', MAGASINIER: '#d97706', VENDEUR: '#16a34a',
+    ACHETEUR: '#4f46e5', COMPTABLE: '#9333ea', OBSERVATEUR: '#64748b',
   };
 
   showForm = false;
   loading = false;
-  erro = '';
+  error = '';
   success = '';
-
-  novo: NouvelUtilisateur = {
-    username: '',
-    password: '',
-    nome: '',
-    email: '',
-    role: 'OBSERVATEUR'
-  };
-
   showPassword = false;
+
+  draft: NewUserForm = { ...EMPTY_FORM };
 
   constructor(private http: HttpClient, public auth: AuthService) {}
 
-  ngOnInit(): void {
-    this.carregar();
-  }
+  ngOnInit(): void { this.load(); }
 
-  carregar(): void {
-    this.erro = '';
-    this.http.get<Usuario[]>('/api/usuarios').subscribe({
-      next: d => this.usuarios = d,
-      error: e => this.erro = e?.error?.message || 'Erreur lors du chargement'
+  load(): void {
+    this.error = '';
+    this.http.get<User[]>(this.usersUrl).subscribe({
+      next: d => (this.users = d),
+      error: e => (this.error = e?.error?.message || 'Erreur lors du chargement'),
     });
   }
 
@@ -81,67 +69,94 @@ export class UsuariosComponent implements OnInit {
   }
 
   resetForm(): void {
-    this.novo = { username: '', password: '', nome: '', email: '', role: 'OBSERVATEUR' };
-    this.erro = '';
+    this.draft = { ...EMPTY_FORM };
+    this.error = '';
     this.success = '';
     this.showPassword = false;
   }
 
-  creer(): void {
-    this.erro = '';
+  /**
+   * Creation en deux temps : /auth/register cree systematiquement un compte
+   * OBSERVATEUR (le serveur ignore tout role fourni par le client), puis le role
+   * demande est applique via l'endpoint reserve aux administrateurs.
+   */
+  create(): void {
+    this.error = '';
     this.success = '';
 
-    if (!this.novo.username.trim() || this.novo.username.length < 3) {
-      this.erro = 'Nom d\'utilisateur requis (3 caractères minimum)';
+    if (!this.draft.username.trim() || this.draft.username.length < 3) {
+      this.error = "Nom d'utilisateur requis (3 caractères minimum)";
       return;
     }
-    if (!this.novo.password || this.novo.password.length < 6) {
-      this.erro = 'Mot de passe requis (6 caractères minimum)';
+    if (!this.draft.password || this.draft.password.length < 8) {
+      this.error = 'Mot de passe requis (8 caractères minimum)';
       return;
     }
-    if (!this.novo.nome.trim()) {
-      this.erro = 'Nom complet requis';
+    if (!this.draft.name.trim()) {
+      this.error = 'Nom complet requis';
       return;
     }
-    if (!this.novo.email.trim()) {
-      this.erro = 'Email requis';
+    if (!this.draft.email.trim()) {
+      this.error = 'Email requis';
       return;
     }
 
     this.loading = true;
-    this.http.post<Usuario>('/api/auth/register', this.novo).subscribe({
+    const username = this.draft.username;
+    const wantedRole = this.draft.role;
+
+    this.http.post<User>(this.registerUrl, {
+      username: this.draft.username,
+      password: this.draft.password,
+      name: this.draft.name,
+      email: this.draft.email,
+    }).pipe(
+      switchMap(created =>
+        wantedRole === 'OBSERVATEUR'
+          ? [created]
+          : this.http.put<User>(`${this.usersUrl}/${created.id}/role`, { role: wantedRole })
+      )
+    ).subscribe({
       next: () => {
         this.loading = false;
-        this.success = `Utilisateur « ${this.novo.username} » créé avec succès`;
+        this.success = `Utilisateur « ${username} » créé avec le rôle ${wantedRole}`;
         this.resetForm();
         this.showForm = false;
-        this.carregar();
+        this.load();
       },
-      error: (e) => {
+      error: e => {
         this.loading = false;
-        this.erro = e?.error?.message || 'Erreur lors de la création';
-      }
+        this.error = e?.error?.message || 'Erreur lors de la création';
+      },
     });
   }
 
-  toggleActif(u: Usuario): void {
+  updateRole(u: User, role: Role): void {
     if (!u.id) return;
-    this.http.patch(`/api/usuarios/${u.id}/actif`, {}).subscribe({
-      next: () => this.carregar(),
-      error: (e) => this.erro = e?.error?.message || 'Erreur'
+    this.http.put<User>(`${this.usersUrl}/${u.id}/role`, { role }).subscribe({
+      next: () => this.load(),
+      error: e => (this.error = e?.error?.message || 'Erreur lors du changement de rôle'),
     });
   }
 
-  excluir(u: Usuario): void {
+  toggleActive(u: User): void {
+    if (!u.id) return;
+    this.http.patch(`${this.usersUrl}/${u.id}/active`, {}).subscribe({
+      next: () => this.load(),
+      error: e => (this.error = e?.error?.message || 'Erreur'),
+    });
+  }
+
+  remove(u: User): void {
     if (!u.id) return;
     if (u.username === this.auth.currentUser()?.username) {
-      this.erro = 'Vous ne pouvez pas supprimer votre propre compte';
+      this.error = 'Vous ne pouvez pas supprimer votre propre compte';
       return;
     }
-    if (confirm(`Exclure définitivement l'utilisateur « ${u.username} » ?`)) {
-      this.http.delete(`/api/usuarios/${u.id}`).subscribe({
-        next: () => this.carregar(),
-        error: (e) => this.erro = e?.error?.message || 'Erreur lors de la suppression'
+    if (confirm(`Supprimer définitivement l'utilisateur « ${u.username} » ?`)) {
+      this.http.delete(`${this.usersUrl}/${u.id}`).subscribe({
+        next: () => this.load(),
+        error: e => (this.error = e?.error?.message || 'Erreur lors de la suppression'),
       });
     }
   }
@@ -149,7 +164,7 @@ export class UsuariosComponent implements OnInit {
   getRoleIcon(role: Role): string { return this.roleIcons[role]; }
   getRoleColor(role: Role): string { return this.roleColors[role]; }
 
-  get actifs(): number { return this.usuarios.filter(u => u.actif).length; }
-  get inactifs(): number { return this.usuarios.filter(u => !u.actif).length; }
-  countByRole(role: Role): number { return this.usuarios.filter(u => u.role === role).length; }
+  get activeCount(): number { return this.users.filter(u => u.active).length; }
+  get inactiveCount(): number { return this.users.filter(u => !u.active).length; }
+  countByRole(role: Role): number { return this.users.filter(u => u.role === role).length; }
 }

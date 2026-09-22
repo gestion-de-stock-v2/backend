@@ -2,14 +2,14 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import {LoginRequest, LoginResponse, Role, Usuario} from '../models/usuario.model';
+import { LoginRequest, LoginResponse, RegisterRequest, Role, User } from '../models/user.model';
 
-const TOKEN_KEY = 'estoque_token';
-const USER_KEY  = 'estoque_user';
+const TOKEN_KEY = 'gestionstock_token';
+const USER_KEY = 'gestionstock_user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private base = '/api/auth';
+  private base = '/api/v1/auth';
   currentUser = signal<LoginResponse | null>(this.loadUser());
 
   constructor(private http: HttpClient, private router: Router) {}
@@ -24,20 +24,28 @@ export class AuthService {
     );
   }
 
-  register(data: Partial<Usuario> & { password: string }): Observable<Usuario> {
-    return this.http.post<Usuario>(`${this.base}/register`, data);
+  /**
+   * Inscription libre. Le role n'est pas transmis : le serveur attribue
+   * systematiquement OBSERVATEUR (lecture seule). Seul un administrateur peut
+   * ensuite elever les droits d'un compte.
+   */
+  register(data: RegisterRequest): Observable<User> {
+    return this.http.post<User>(`${this.base}/register`, data);
   }
 
-  forgotPassword(email: string): Observable<any> {
-    return this.http.post(`${this.base}/forgot-password`, { email });
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/forgot-password`, { email });
   }
 
-  resetPassword(token: string, newPassword: string): Observable<any> {
-    return this.http.post(`${this.base}/reset-password`, { token, newPassword });
+  resetPassword(token: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/reset-password`, { token, newPassword });
   }
 
-  changePassword(currentPassword: string, newPassword: string): Observable<any> {
-    return this.http.post(`${this.base}/change-password`, { currentPassword, newPassword });
+  changePassword(currentPassword: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/change-password`, {
+      currentPassword,
+      newPassword,
+    });
   }
 
   logout(): void {
@@ -58,6 +66,13 @@ export class AuthService {
 
   private loadUser(): LoginResponse | null {
     const raw = localStorage.getItem(USER_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as LoginResponse;
+    } catch {
+      // Entree corrompue : on repart d'une session vide plutot que de planter au demarrage.
+      localStorage.removeItem(USER_KEY);
+      return null;
+    }
   }
 }

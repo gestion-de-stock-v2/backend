@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="header-actions">
-      <button class="btn-secondary" (click)="carregar()">
+      <button class="btn-secondary" (click)="load()">
         <app-icon name="trending" [size]="18"></app-icon>
         <span>Actualiser</span>
       </button>
@@ -101,57 +101,57 @@
        ============================================================ -->
   <div class="form-card" *ngIf="showForm">
     <div class="card-header">
-      <app-icon [name]="editandoId ? 'edit' : 'plus'" [size]="20"></app-icon>
-      <h3>{{ editandoId ? 'Modifier' : 'Créer' }} un produit</h3>
+      <app-icon [name]="editingId ? 'edit' : 'plus'" [size]="20"></app-icon>
+      <h3>{{ editingId ? 'Modifier' : 'Créer' }} un produit</h3>
     </div>
 
-    <form (ngSubmit)="salvar()" class="user-form">
+    <form (ngSubmit)="save()" class="user-form">
       <div class="form-row">
         <div class="form-group">
           <label>Nom du produit</label>
-          <input [(ngModel)]="novo.nome" name="nome" placeholder="Notebook Lenovo" required />
+          <input [(ngModel)]="draft.name" name="name" placeholder="Notebook Lenovo" required />
         </div>
         <div class="form-group">
           <label>Description</label>
-          <input [(ngModel)]="novo.descricao" name="descricao" placeholder="Intel i5, 8GB RAM" />
+          <input [(ngModel)]="draft.description" name="description" placeholder="Intel i5, 8GB RAM" />
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Prix (€)</label>
-          <input [(ngModel)]="novo.preco" name="preco" type="number" step="0.01" min="0" required />
+          <input [(ngModel)]="draft.price" name="price" type="number" step="0.01" min="0" required />
         </div>
         <div class="form-group">
           <label>Quantité en stock</label>
-          <input [(ngModel)]="novo.quantidade" name="quantidade" type="number" min="0" required />
+          <input [(ngModel)]="draft.availableQuantity" name="availableQuantity" type="number" min="0" required />
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Catégorie</label>
-          <select [(ngModel)]="categoriaId" name="categoria">
+          <select [(ngModel)]="draft.categoryId" name="categoryId">
             <option [ngValue]="null">-- Aucune --</option>
-            <option *ngFor="let c of categorias" [ngValue]="c.id">{{ c.nome }}</option>
+            <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
           </select>
         </div>
         <div class="form-group">
           <label>Fournisseur</label>
-          <select [(ngModel)]="fornecedorId" name="fornecedor">
+          <select [(ngModel)]="draft.supplierId" name="supplierId">
             <option [ngValue]="null">-- Aucun --</option>
-            <option *ngFor="let f of fornecedores" [ngValue]="f.id">{{ f.nome }}</option>
+            <option *ngFor="let f of suppliers" [ngValue]="f.id">{{ f.name }}</option>
           </select>
         </div>
       </div>
 
-      <p *ngIf="erro" class="msg-error">
+      <p *ngIf="error" class="msg-error">
         <app-icon name="alert" [size]="16"></app-icon>
-        <span>{{ erro }}</span>
+        <span>{{ error }}</span>
       </p>
 
       <div class="form-actions">
-        <button type="button" class="btn-secondary" (click)="cancelar()">
+        <button type="button" class="btn-secondary" (click)="cancel()">
           <app-icon name="close" [size]="16"></app-icon>
           <span>Annuler</span>
         </button>
@@ -171,9 +171,9 @@
     <span>{{ success }}</span>
   </p>
 
-  <p *ngIf="erro && !showForm" class="msg-error">
+  <p *ngIf="error && !showForm" class="msg-error">
     <app-icon name="alert" [size]="16"></app-icon>
-    <span>{{ erro }}</span>
+    <span>{{ error }}</span>
   </p>
 
   <!-- ============================================================
@@ -203,36 +203,36 @@
       <tbody>
       <tr *ngFor="let p of filtered">
         <td><span class="id-badge">{{ p.id }}</span></td>
-        <td><strong>{{ p.nome }}</strong></td>
-        <td class="desc-cell">{{ p.descricao }}</td>
+        <td><strong>{{ p.name }}</strong></td>
+        <td class="desc-cell">{{ p.description }}</td>
         <td>
-          <span class="tag" *ngIf="p.categoria?.nome">{{ p.categoria?.nome }}</span>
-          <span class="tag empty" *ngIf="!p.categoria?.nome">—</span>
+          <span class="tag" *ngIf="p.categoryName">{{ p.categoryName }}</span>
+          <span class="tag empty" *ngIf="!p.categoryName">—</span>
         </td>
         <td>
-          <span class="tag supplier" *ngIf="p.fornecedor?.nome">{{ p.fornecedor?.nome }}</span>
-          <span class="tag empty" *ngIf="!p.fornecedor?.nome">—</span>
+          <span class="tag supplier" *ngIf="p.supplierName">{{ p.supplierName }}</span>
+          <span class="tag empty" *ngIf="!p.supplierName">—</span>
         </td>
-        <td class="price">{{ p.preco | number:'1.2-2' }} €</td>
+        <td class="price">{{ p.price | number:'1.2-2' }} €</td>
         <td>
-          <span class="stock-qty">{{ p.quantidade }}</span>
+          <span class="stock-qty">{{ p.availableQuantity }}</span>
         </td>
         <td>
           <div class="level-bar">
             <div class="level-fill"
-                 [ngClass]="getStockClass(p.quantidade)"
-                 [style.width.%]="getStockPercent(p.quantidade)"></div>
+                 [ngClass]="getStockClass(p.availableQuantity)"
+                 [style.width.%]="getStockPercent(p.availableQuantity)"></div>
           </div>
-          <span class="level-label" [ngClass]="getStockClass(p.quantidade)">
-              {{ getStockLabel(p.quantidade) }}
+          <span class="level-label" [ngClass]="getStockClass(p.availableQuantity)">
+              {{ getStockLabel(p.availableQuantity) }}
             </span>
         </td>
-        <td class="value">{{ (p.preco * p.quantidade) | number:'1.2-2' }} €</td>
+        <td class="value">{{ (p.price * p.availableQuantity) | number:'1.2-2' }} €</td>
         <td class="actions-cell">
-          <button class="btn-icon" (click)="editar(p)" title="Modifier">
+          <button class="btn-icon" (click)="edit(p)" title="Modifier">
             <app-icon name="edit" [size]="16"></app-icon>
           </button>
-          <button class="btn-icon danger" (click)="excluir(p.id!)" title="Supprimer">
+          <button class="btn-icon danger" (click)="remove(p.id!)" title="Supprimer">
             <app-icon name="trash" [size]="16"></app-icon>
           </button>
         </td>

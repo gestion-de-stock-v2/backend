@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { IconComponent } from '../../components/icon/icon.component';
-import { Role } from '../../models/usuario.model';
+import { Role } from '../../models/user.model';
 
 @Component({
   selector: 'app-profile',

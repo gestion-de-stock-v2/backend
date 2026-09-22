@@ -1,36 +1,39 @@
 <h2>Catégories</h2>
 
-<form #formCat="ngForm" (ngSubmit)="formCat.valid && salvar()" class="form">
+<form #formCat="ngForm" (ngSubmit)="formCat.valid && save()" class="form">
   <input
-    [(ngModel)]="nova.nome"
-    name="nome"
+    [(ngModel)]="draft.name"
+    name="name"
     placeholder="Nom de la catégorie"
     required
     minlength="2"
-    #nome="ngModel" />
-  <span class="hint" *ngIf="nome.invalid && nome.touched">Nom obligatoire</span>
+    #name="ngModel" />
+  <span class="hint" *ngIf="name.invalid && name.touched">Nom obligatoire</span>
+
+  <input [(ngModel)]="draft.description" name="description" placeholder="Description" />
 
   <button type="submit" [disabled]="formCat.invalid">
-    {{ editandoId ? 'Mettre à jour' : 'Ajouter' }}
+    {{ editingId ? 'Mettre à jour' : 'Ajouter' }}
   </button>
-  <button type="button" *ngIf="editandoId" (click)="cancelar()">Annuler</button>
+  <button type="button" *ngIf="editingId" (click)="cancel()">Annuler</button>
 </form>
 
-<p *ngIf="erro" class="erro">{{ erro }}</p>
+<p *ngIf="error" class="erro">{{ error }}</p>
 
 <table class="table">
   <thead>
-    <tr><th>ID</th><th>Nom</th><th>Actions</th></tr>
+    <tr><th>ID</th><th>Nom</th><th>Description</th><th>Actions</th></tr>
   </thead>
   <tbody>
-    <tr *ngFor="let c of categorias">
+    <tr *ngFor="let c of categories">
       <td>{{ c.id }}</td>
-      <td>{{ c.nome }}</td>
+      <td>{{ c.name }}</td>
+      <td>{{ c.description }}</td>
       <td>
-        <button (click)="editar(c)">Éditer</button>
-        <button (click)="excluir(c.id!)">Supprimer</button>
+        <button (click)="edit(c)">Éditer</button>
+        <button (click)="remove(c.id!)">Supprimer</button>
       </td>
     </tr>
-    <tr *ngIf="categorias.length === 0"><td colspan="3">Aucune catégorie</td></tr>
+    <tr *ngIf="categories.length === 0"><td colspan="4">Aucune catégorie</td></tr>
   </tbody>
 </table>

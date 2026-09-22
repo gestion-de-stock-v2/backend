@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
-import { Movimentacao } from '../../models/movimentacao.model';
-import { Produto } from '../../models/produto.model';
+import { MovementType, StockMovement, StockMovementRequest } from '../../models/stock-movement.model';
+import { Product } from '../../models/product.model';
 import { IconComponent } from '../../components/icon/icon.component';
 
 @Component({
@@ -11,49 +11,56 @@ import { IconComponent } from '../../components/icon/icon.component';
   standalone: true,
   imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './mouvements.component.html',
-  styleUrls: ['./mouvements.component.css']
+  styleUrls: ['./mouvements.component.css'],
 })
 export class MouvementsComponent implements OnInit {
-  produtos: Produto[] = [];
-  movimentacoes: Movimentacao[] = [];
-  produtoSelecionadoId: number | null = null;
+  products: Product[] = [];
+  movements: StockMovement[] = [];
+  selectedProductId: number | null = null;
 
-  nova: Movimentacao = {
-    tipo: 'ENTRADA', quantidade: 1, observacao: '',
-    produto: { nome: '', preco: 0, quantidade: 0 }
-  };
-  erro = '';
+  type: MovementType = 'ENTRY';
+  quantity = 1;
+  note = '';
+  error = '';
 
   constructor(private api: ApiService) {}
 
-  ngOnInit(): void {
-    this.api.getProdutos().subscribe(d => {
-      this.produtos = d;
-      if (d.length) { this.produtoSelecionadoId = d[0].id!; this.carregar(); }
+  ngOnInit(): void { this.loadProducts(true); }
+
+  private loadProducts(selectFirst = false): void {
+    this.api.getProducts().subscribe(d => {
+      this.products = d;
+      if (selectFirst && d.length) {
+        this.selectedProductId = d[0].id!;
+        this.load();
+      }
     });
   }
 
-  carregar(): void {
-    if (!this.produtoSelecionadoId) return;
-    this.api.getMovimentacoes(this.produtoSelecionadoId).subscribe(d => this.movimentacoes = d);
+  load(): void {
+    if (!this.selectedProductId) return;
+    this.api.getStockMovements(this.selectedProductId).subscribe(d => (this.movements = d));
   }
 
-  salvar(): void {
-    this.erro = '';
-    if (!this.produtoSelecionadoId) return;
-    const payload: Movimentacao = {
-      tipo: this.nova.tipo,
-      quantidade: this.nova.quantidade,
-      observacao: this.nova.observacao,
-      produto: { id: this.produtoSelecionadoId, nome: '', preco: 0, quantidade: 0 }
+  save(): void {
+    this.error = '';
+    if (!this.selectedProductId) return;
+
+    const payload: StockMovementRequest = {
+      productId: this.selectedProductId,
+      type: this.type,
+      quantity: Number(this.quantity) || 0,
+      note: this.note,
     };
-    this.api.createMovimentacao(payload).subscribe({
+
+    this.api.createStockMovement(payload).subscribe({
       next: () => {
-        this.nova.observacao = '';
-        this.carregar();
-        this.api.getProdutos().subscribe(d => this.produtos = d);
+        this.note = '';
+        this.load();
+        // La quantite disponible a change : recharger le catalogue.
+        this.loadProducts();
       },
-      error: (e) => this.erro = e?.error?.message || 'Erreur : stock insuffisant'
+      error: e => (this.error = e?.error?.message || 'Erreur : stock insuffisant'),
     });
   }
 }

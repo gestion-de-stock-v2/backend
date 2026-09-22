@@ -2,32 +2,39 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
-import { Produto } from '../../models/produto.model';
-import { Categoria } from '../../models/categoria.model';
-import { Fornecedor } from '../../models/fornecedor.model';
+import { Product, ProductRequest } from '../../models/product.model';
+import { Category } from '../../models/category.model';
+import { Supplier } from '../../models/supplier.model';
 import { IconComponent } from '../../components/icon/icon.component';
+
+const EMPTY_DRAFT: ProductRequest = {
+  name: '',
+  description: '',
+  price: 0,
+  availableQuantity: 0,
+  categoryId: 0,
+  supplierId: undefined,
+};
 
 @Component({
   selector: 'app-produtos',
   standalone: true,
   imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './produtos.component.html',
-  styleUrls: ['./produtos.component.css']
+  styleUrls: ['./produtos.component.css'],
 })
 export class ProdutosComponent implements OnInit {
-  produtos: Produto[] = [];
-  filtered: Produto[] = [];
-  categorias: Categoria[] = [];
-  fornecedores: Fornecedor[] = [];
+  products: Product[] = [];
+  filtered: Product[] = [];
+  categories: Category[] = [];
+  suppliers: Supplier[] = [];
 
-  novo: Produto = { nome: '', descricao: '', preco: 0, quantidade: 0 };
-  categoriaId: number | null = null;
-  fornecedorId: number | null = null;
-  editandoId: number | null = null;
+  draft: ProductRequest = { ...EMPTY_DRAFT };
+  editingId: number | null = null;
 
   showForm = false;
   loading = false;
-  erro = '';
+  error = '';
   success = '';
   searchTerm = '';
 
@@ -36,24 +43,19 @@ export class ProdutosComponent implements OnInit {
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
-    this.carregar();
-    this.api.getCategorias().subscribe(d => this.categorias = d);
-    this.api.getFornecedores().subscribe(d => this.fornecedores = d);
+    this.load();
+    this.api.getCategories().subscribe(d => (this.categories = d));
+    this.api.getSuppliers().subscribe(d => (this.suppliers = d));
   }
 
-  carregar(): void {
-    this.api.getProdutos().subscribe({
-      next: d => {
-        this.produtos = d;
-        this.applyFilter();
-      },
-      error: e => this.erro = e?.error?.message || 'Erreur de chargement'
+  load(): void {
+    this.api.getProducts().subscribe({
+      next: d => { this.products = d; this.applyFilter(); },
+      error: e => (this.error = e?.error?.message || 'Erreur de chargement'),
     });
   }
 
-  /* ============================================================
-     FILTRES
-     ============================================================ */
+  /* ---------------- Filtres ---------------- */
   setFilter(f: 'all' | 'low' | 'medium' | 'high'): void {
     this.filter = f;
     this.applyFilter();
@@ -61,64 +63,43 @@ export class ProdutosComponent implements OnInit {
 
   applyFilter(): void {
     const term = this.searchTerm.toLowerCase().trim();
+    let result = this.products;
 
-    let result = this.produtos;
-
-    // Filtre stock
     if (this.filter === 'low') {
-      result = result.filter(p => p.quantidade < 5);
+      result = result.filter(p => p.availableQuantity < 5);
     } else if (this.filter === 'medium') {
-      result = result.filter(p => p.quantidade >= 5 && p.quantidade < 20);
+      result = result.filter(p => p.availableQuantity >= 5 && p.availableQuantity < 20);
     } else if (this.filter === 'high') {
-      result = result.filter(p => p.quantidade >= 20);
+      result = result.filter(p => p.availableQuantity >= 20);
     }
 
-    // Filtre recherche
     if (term) {
       result = result.filter(p =>
-        p.nome?.toLowerCase().includes(term) ||
-        p.descricao?.toLowerCase().includes(term) ||
-        p.categoria?.nome?.toLowerCase().includes(term) ||
-        p.fornecedor?.nome?.toLowerCase().includes(term)
+        p.name?.toLowerCase().includes(term) ||
+        p.description?.toLowerCase().includes(term) ||
+        p.categoryName?.toLowerCase().includes(term) ||
+        p.supplierName?.toLowerCase().includes(term)
       );
     }
 
     this.filtered = result;
   }
 
-  /* ============================================================
-     STATISTIQUES
-     ============================================================ */
-  get totalProducts(): number {
-    return this.produtos.length;
-  }
-
-  get lowStockCount(): number {
-    return this.produtos.filter(p => p.quantidade < 5).length;
-  }
-
+  /* ---------------- Statistiques ---------------- */
+  get totalProducts(): number { return this.products.length; }
+  get lowStockCount(): number { return this.products.filter(p => p.availableQuantity < 5).length; }
   get mediumStockCount(): number {
-    return this.produtos.filter(p => p.quantidade >= 5 && p.quantidade < 20).length;
+    return this.products.filter(p => p.availableQuantity >= 5 && p.availableQuantity < 20).length;
   }
-
-  get highStockCount(): number {
-    return this.produtos.filter(p => p.quantidade >= 20).length;
-  }
-
+  get highStockCount(): number { return this.products.filter(p => p.availableQuantity >= 20).length; }
   get totalUnits(): number {
-    return this.produtos.reduce((sum, p) => sum + (p.quantidade || 0), 0);
+    return this.products.reduce((sum, p) => sum + (p.availableQuantity || 0), 0);
   }
-
   get totalValue(): number {
-    return this.produtos.reduce(
-      (sum, p) => sum + ((p.preco || 0) * (p.quantidade || 0)),
-      0
-    );
+    return this.products.reduce((sum, p) => sum + (p.price || 0) * (p.availableQuantity || 0), 0);
   }
 
-  /* ============================================================
-     UTILITAIRES STOCK
-     ============================================================ */
+  /* ---------------- Indicateurs de stock ---------------- */
   getStockClass(qty: number): string {
     if (qty < 5) return 'low';
     if (qty < 20) return 'medium';
@@ -126,8 +107,7 @@ export class ProdutosComponent implements OnInit {
   }
 
   getStockPercent(qty: number): number {
-    // Barre : 100% à partir de 30 unités
-    const max = 30;
+    const max = 30; // barre pleine a partir de 30 unites
     return Math.min((qty / max) * 100, 100);
   }
 
@@ -138,87 +118,81 @@ export class ProdutosComponent implements OnInit {
     return 'Élevé';
   }
 
-  /* ============================================================
-     CRUD
-     ============================================================ */
+  /* ---------------- CRUD ---------------- */
   toggleForm(): void {
     this.showForm = !this.showForm;
-    if (!this.showForm) this.cancelar();
+    if (!this.showForm) this.cancel();
   }
 
-  salvar(): void {
-    this.erro = '';
+  save(): void {
+    this.error = '';
     this.success = '';
 
-    if (!this.novo.nome?.trim()) {
-      this.erro = 'Le nom est obligatoire';
+    if (!this.draft.name?.trim()) {
+      this.error = 'Le nom est obligatoire';
+      return;
+    }
+    if (!this.draft.categoryId) {
+      this.error = 'La catégorie est obligatoire';
       return;
     }
 
-    const payload: Produto = {
-      ...this.novo,
-      preco: Number(this.novo.preco) || 0,
-      quantidade: Number(this.novo.quantidade) || 0,
-      categoria: this.categoriaId ? { id: this.categoriaId, nome: '' } : undefined,
-      fornecedor: this.fornecedorId ? { id: this.fornecedorId, nome: '' } : undefined
+    const payload: ProductRequest = {
+      ...this.draft,
+      price: Number(this.draft.price) || 0,
+      availableQuantity: Number(this.draft.availableQuantity) || 0,
+      supplierId: this.draft.supplierId || undefined,
     };
 
     this.loading = true;
+    const done = (message: string) => () => {
+      this.loading = false;
+      this.success = message;
+      this.cancel();
+      this.load();
+    };
+    const fail = (fallback: string) => (e: any) => {
+      this.loading = false;
+      this.error = e?.error?.message || fallback;
+    };
 
-    if (this.editandoId) {
-      this.api.updateProduto(this.editandoId, payload).subscribe({
-        next: () => {
-          this.loading = false;
-          this.success = 'Produit modifié';
-          this.cancelar();
-          this.carregar();
-        },
-        error: e => {
-          this.loading = false;
-          this.erro = e?.error?.message || 'Erreur modification';
-        }
-      });
+    if (this.editingId) {
+      this.api.updateProduct(this.editingId, payload)
+        .subscribe({ next: done('Produit modifié'), error: fail('Erreur modification') });
     } else {
-      this.api.createProduto(payload).subscribe({
-        next: () => {
-          this.loading = false;
-          this.success = 'Produit créé';
-          this.cancelar();
-          this.carregar();
-        },
-        error: e => {
-          this.loading = false;
-          this.erro = e?.error?.message || 'Erreur création';
-        }
-      });
+      this.api.createProduct(payload)
+        .subscribe({ next: done('Produit créé'), error: fail('Erreur création') });
     }
   }
 
-  editar(p: Produto): void {
-    this.editandoId = p.id!;
-    this.novo = { ...p };
-    this.categoriaId = p.categoria?.id ?? null;
-    this.fornecedorId = p.fornecedor?.id ?? null;
+  edit(p: Product): void {
+    this.editingId = p.id!;
+    this.draft = {
+      name: p.name,
+      description: p.description,
+      price: p.price,
+      availableQuantity: p.availableQuantity,
+      categoryId: p.categoryId ?? 0,
+      supplierId: p.supplierId,
+    };
     this.showForm = true;
-    this.erro = '';
+    this.error = '';
     this.success = '';
   }
 
-  excluir(id: number): void {
+  remove(id: number): void {
     if (confirm('Supprimer ce produit ?')) {
-      this.api.deleteProduto(id).subscribe({
-        next: () => this.carregar(),
-        error: e => this.erro = e?.error?.message || 'Erreur suppression'
+      this.api.deleteProduct(id).subscribe({
+        next: () => this.load(),
+        error: e => (this.error = e?.error?.message || 'Erreur suppression'),
       });
     }
   }
 
-  cancelar(): void {
-    this.editandoId = null;
-    this.novo = { nome: '', descricao: '', preco: 0, quantidade: 0 };
-    this.categoriaId = null;
-    this.fornecedorId = null;
-    this.erro = '';
+  cancel(): void {
+    this.editingId = null;
+    this.draft = { ...EMPTY_DRAFT };
+    this.error = '';
     this.success = '';
   }
 }
