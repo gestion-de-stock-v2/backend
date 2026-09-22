@@ -1,1 +1,0 @@
-# GESTION_DE_STOCK_v1

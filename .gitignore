@@ -1,30 +1,31 @@
-# Backend
-backend/target/
-backend/.mvn/
-backend/mvnw
-backend/mvnw.cmd
+# ===== Java / Maven =====
+target/
 *.class
 *.jar
 *.war
+!**/.mvn/wrapper/maven-wrapper.jar
 
-# Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/.angular/
-frontend/.cache/
+# ===== Node / Angular =====
+node_modules/
+frontend-angular/dist/
+frontend-angular/.angular/
+frontend-angular/.cache/
+# NB : package-lock.json EST versionne (builds reproductibles)
 
-# IDE
+# ===== Secrets =====
+.env
+*.local.env
+
+# ===== Logs =====
+logs/
+*.log
+
+# ===== IDE =====
 .idea/
 .vscode/
 *.iml
+.claude/
 
-# OS
+# ===== OS =====
 .DS_Store
 Thumbs.db
-
-# Logs
-*.log
-
-# Node
-node_modules/
-package-lock.json
