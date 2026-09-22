@@ -18,7 +18,7 @@ COPY services/ services/
 # chaque service retelechargeait l'integralite des dependances pour son compte.
 # sharing=locked serialise les acces concurrents au depot local.
 RUN --mount=type=cache,target=/root/.m2,sharing=locked \
-    mvn -B -q -pl services/${SERVICE} -am package -DskipTests \
+    mvn -B -q -pl services/${SERVICE} -am clean package -DskipTests \
  && cp services/${SERVICE}/target/*.jar /build/application.jar
 
 # ---------- Image d'execution ----------

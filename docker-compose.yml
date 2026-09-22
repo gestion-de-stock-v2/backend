@@ -84,8 +84,15 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      # Sans cette liste blanche, la sonde 'ruok' du healthcheck ci-dessous est
+      # refusee par le serveur ("ruok is not executed because it is not in the
+      # whitelist") et le conteneur reste indefiniment unhealthy.
+      ZOOKEEPER_4LW_COMMANDS_WHITELIST: "ruok,srvr,stat"
     healthcheck:
-      test: ["CMD-SHELL", "echo ruok | nc -w 2 localhost 2181 | grep imok"]
+      # Simple test TCP : la sonde applicative 'ruok' depend de la liste blanche
+      # 4lw, que cette image n'applique pas de maniere fiable. Verifier que le
+      # port accepte les connexions suffit a ordonner le demarrage de Kafka.
+      test: ["CMD-SHELL", "nc -z localhost 2181 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -153,6 +160,12 @@ services:
     environment:
       <<: *service-env
       SERVER_PORT: 8888
+      # Doit rester "native" : ce profil indique au serveur de lire les fichiers de
+      # configurations/ depuis le classpath. L'ancre commune propage SPRING_PROFILES_ACTIVE
+      # (valeur "dev" par defaut), ce qui ecrasait ce profil et faisait basculer le
+      # serveur sur son backend Git par defaut -- il refusait alors de demarrer,
+      # faute d'URI de depot.
+      SPRING_PROFILES_ACTIVE: native
       # Selon la configuration, le serveur peut resoudre les placeholders des
       # fichiers qu'il sert avant de les renvoyer. Il lui faut donc les memes
       # variables que ses clients, sans quoi gateway-service.yml et
@@ -326,7 +339,8 @@ services:
       gateway:
         condition: service_healthy
     ports:
-      - "4200:80"
+      # Port hote parametrable : 4200 est souvent deja pris par un `ng serve` local.
+      - "${FRONTEND_HOST_PORT:-4200}:80"
     networks: [gs-net]
     restart: unless-stopped
 

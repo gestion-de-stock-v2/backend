@@ -1,0 +1,9 @@
+# Les repertoires de build de la machine hote ne doivent jamais entrer dans le
+# contexte : ils contiennent des artefacts perimes (ressources supprimees des
+# sources mais toujours presentes dans target/classes) qui se retrouvaient
+# empaquetes dans l'image.
+**/target/
+**/.mvn/
+**/mvnw
+**/mvnw.cmd
+**/*.log
