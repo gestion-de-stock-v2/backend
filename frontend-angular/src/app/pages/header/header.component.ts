@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { IconComponent } from '../../components/icon/icon.component';
 import { Role } from '../../models/user.model';
+import { ROLE_COLORS } from '../../models/role-style';
 
 interface NavItem {
   path: string;
@@ -20,16 +21,7 @@ interface NavItem {
   styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent {
-  /** Teintes de rôle issues de la charte (primaire, accent, sémantiques). */
-  roleColors: Record<Role, string> = {
-    ADMIN:       'var(--danger)',
-    GERANT:      'var(--primary)',
-    MAGASINIER:  'var(--accent)',
-    VENDEUR:     'var(--success)',
-    ACHETEUR:    'var(--primary-bright)',
-    COMPTABLE:   'var(--accent-bright)',
-    OBSERVATEUR: 'var(--ink-muted)',
-  };
+  roleColors = ROLE_COLORS;
 
   nav: NavItem[] = [
     { path: '/dashboard',    icon: 'dashboard', label: 'Tableau de bord' },

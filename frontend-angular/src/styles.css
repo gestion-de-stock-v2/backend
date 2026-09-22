@@ -5,7 +5,33 @@
    provenir d'un token défini ici, jamais d'une valeur en dur.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+/* ------------------------------------------------------------
+   Plus Jakarta Sans, hébergée par l'application.
+   L'import distant depuis fonts.googleapis.com a été retiré : Angular
+   inline les feuilles externes au moment du build, ce qui faisait
+   dépendre chaque compilation d'un appel réseau — et la faisait échouer
+   dès que cet appel ne passait pas. Les fichiers locaux suppriment aussi
+   toute requête tierce à l'exécution.
+
+   Police variable : un seul fichier couvre les graisses 400 à 800.
+   ------------------------------------------------------------ */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/plus-jakarta-sans-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/plus-jakarta-sans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 :root {
   /* ---------- Spectre primaire : bleu royal & électrique ---------- */
@@ -760,9 +786,10 @@ input[type="radio"]   { border-radius: var(--r-full); }
 .self-tag {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  height: 26px;
-  padding: 0 10px;
+  height: 28px;
+  padding: 0 12px;
   border-radius: var(--r-full);
   font-size: 11px;
   font-weight: 700;
@@ -770,9 +797,35 @@ input[type="radio"]   { border-radius: var(--r-full); }
   white-space: nowrap;
 }
 
+/*
+ * Pastille de rôle.
+ *
+ * Toutes les pastilles partagent la même boîte : une largeur minimale calée
+ * sur le libellé le plus long (OBSERVATEUR) évite que la colonne présente
+ * sept formes de tailles différentes. Le contenu est centré.
+ *
+ * Le fond est une teinte à 10 % de la couleur du rôle et le texte reprend
+ * cette couleur en pleine saturation : c'est le schéma des puces de la charte
+ * (§ Chips & Badges), et il garantit un contraste lisible. L'implémentation
+ * précédente posait la couleur saturée en fond tout en laissant le texte en
+ * bleu foncé, d'où l'illisibilité.
+ */
 .role-pill {
-  background: color-mix(in srgb, var(--role-color, var(--primary)) 12%, transparent);
+  min-width: 124px;
+  background: color-mix(in srgb, var(--role-color, var(--primary)) 10%, var(--surface-raised));
+  border: 1px solid color-mix(in srgb, var(--role-color, var(--primary)) 32%, transparent);
   color: var(--role-color, var(--primary));
+}
+
+.role-pill app-icon { flex-shrink: 0; display: flex; }
+
+/* Le libellé occupe le reste de la boîte et reste centré quelle que soit sa longueur. */
+.role-pill-text { flex: 1; text-align: center; }
+
+/* Le mode sombre demande une teinte plus soutenue pour rester perceptible. */
+.dark .role-pill {
+  background: color-mix(in srgb, var(--role-color, var(--primary)) 20%, var(--surface-raised));
+  border-color: color-mix(in srgb, var(--role-color, var(--primary)) 45%, transparent);
 }
 
 .status-pill { background: var(--border); color: var(--ink-muted); }

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { IconComponent } from '../../components/icon/icon.component';
 import { Role } from '../../models/user.model';
+import { ROLE_COLORS, ROLE_ICONS } from '../../models/role-style';
 
 @Component({
   selector: 'app-profile',
@@ -32,25 +33,9 @@ export class ProfileComponent {
     OBSERVATEUR: 'Accès en lecture seule à toutes les données.'
   };
 
-  roleColors: Record<Role, string> = {
-    ADMIN:       '#dc2626',
-    GERANT:      '#2563eb',
-    MAGASINIER:  '#d97706',
-    VENDEUR:     '#16a34a',
-    ACHETEUR:    '#4f46e5',
-    COMPTABLE:   '#9333ea',
-    OBSERVATEUR: '#64748b'
-  };
+  roleColors = ROLE_COLORS;
 
-  roleIcons: Record<Role, string> = {
-    ADMIN:       'crown',
-    GERANT:      'briefcase',
-    MAGASINIER:  'package',
-    VENDEUR:     'cart',
-    ACHETEUR:    'shoppingBag',
-    COMPTABLE:   'chart',
-    OBSERVATEUR: 'eye'
-  };
+  roleIcons = ROLE_ICONS;
 
   constructor(public auth: AuthService) {}
 

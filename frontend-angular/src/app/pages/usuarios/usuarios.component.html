@@ -18,37 +18,37 @@
   <!-- Statistiques -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-icon" style="background:#dbeafe;color:#1e40af;">
+      <div class="stat-icon tone-primary">
         <app-icon name="users" [size]="22"></app-icon>
       </div>
-      <div>
+      <div class="stat-info">
         <span class="stat-value">{{ users.length }}</span>
         <span class="stat-label">Total</span>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon" style="background:#dcfce7;color:#16a34a;">
+      <div class="stat-icon tone-success">
         <app-icon name="check" [size]="22"></app-icon>
       </div>
-      <div>
+      <div class="stat-info">
         <span class="stat-value">{{ activeCount }}</span>
         <span class="stat-label">Actifs</span>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon" style="background:#fee2e2;color:#dc2626;">
+      <div class="stat-icon tone-danger">
         <app-icon name="close" [size]="22"></app-icon>
       </div>
-      <div>
+      <div class="stat-info">
         <span class="stat-value">{{ inactiveCount }}</span>
         <span class="stat-label">Inactifs</span>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon" style="background:#fef3c7;color:#d97706;">
+      <div class="stat-icon tone-accent">
         <app-icon name="shield" [size]="22"></app-icon>
       </div>
-      <div>
+      <div class="stat-info">
         <span class="stat-value">{{ countByRole('ADMIN') }}</span>
         <span class="stat-label">Administrateurs</span>
       </div>
@@ -187,8 +187,9 @@
           <span>{{ u.email }}</span>
         </td>
         <td>
-            <span class="role-pill" [style.background]="getRoleColor(u.role)">
-              {{ u.role }}
+            <span class="role-pill" [style.--role-color]="getRoleColor(u.role)">
+              <app-icon [name]="getRoleIcon(u.role)" [size]="13"></app-icon>
+              <span class="role-pill-text">{{ u.role }}</span>
             </span>
         </td>
         <td>

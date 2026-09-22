@@ -1,14 +1,15 @@
 <div class="profile-page">
 
   <div class="profile-header">
-    <div class="avatar" [style.background]="user ? getRoleColor(user.role) : '#64748b'">
+    <div class="avatar" [style.background]="user ? getRoleColor(user.role) : 'var(--ink-muted)'">
       <app-icon [name]="user ? getRoleIcon(user.role) : 'user'" [size]="48"></app-icon>
     </div>
     <div class="profile-info">
       <h2>{{ user?.name }}</h2>
       <p class="username">&#64;{{ user?.username }}</p>
-      <span class="role-pill" [style.background]="user ? getRoleColor(user.role) : '#64748b'">
-        {{ user?.role }}
+      <span class="role-pill" [style.--role-color]="user ? getRoleColor(user.role) : 'var(--ink-muted)'">
+        <app-icon [name]="user ? getRoleIcon(user.role) : 'user'" [size]="13"></app-icon>
+        <span class="role-pill-text">{{ user?.role }}</span>
       </span>
     </div>
   </div>
@@ -37,7 +38,7 @@
       </div>
     </div>
 
-    <div class="card role-card" [style.borderLeftColor]="user ? getRoleColor(user.role) : '#64748b'">
+    <div class="card role-card" [style.borderLeftColor]="user ? getRoleColor(user.role) : 'var(--ink-muted)'">
       <div class="card-header">
         <app-icon [name]="user ? getRoleIcon(user.role) : 'shield'" [size]="20"></app-icon>
         <h3>Vos permissions</h3>

@@ -18,3 +18,26 @@
   .table th, .table td { padding: var(--space-sm); }
   .email-cell { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+
+/* ============================================================
+   COLONNE RÔLE
+   Largeur réservée pour que toutes les pastilles conservent la
+   même boîte, y compris quand le tableau se comprime.
+   ============================================================ */
+.users-table td:nth-child(4),
+.users-table th:nth-child(4) { width: 1%; white-space: nowrap; }
+
+@media (max-width: 640px) {
+  /* Sur petit écran la boîte se resserre, mais reste identique pour tous. */
+  .role-pill { min-width: 106px; padding: 0 8px; }
+}
+
+/* ============================================================
+   TEINTES DES CARTES DE SYNTHÈSE
+   Remplacent des styles inline hors charte (#dbeafe, #dcfce7,
+   #fee2e2, #fef3c7) qui ne provenaient d'aucun token.
+   ============================================================ */
+.stat-icon.tone-primary { background: var(--primary-tint); color: var(--primary); }
+.stat-icon.tone-success { background: var(--success-tint); color: var(--success); }
+.stat-icon.tone-danger  { background: var(--danger-tint);  color: var(--danger); }
+.stat-icon.tone-accent  { background: var(--accent-tint);  color: var(--accent); }

@@ -29,9 +29,10 @@
 
 .username { margin: 0 0 var(--space-sm); font-size: 14px; color: var(--ink-muted); }
 
-/* La teinte du rôle est posée en style inline : le texte passe en blanc
-   pour rester lisible quel que soit le rôle. */
-.profile-info .role-pill { color: #fff; }
+/* La pastille reprend le traitement commun : fond teinté, texte à la couleur
+   du rôle. Aucune surcharge n'est nécessaire, le contraste est assuré par
+   .role-pill dans styles.css. */
+.profile-info .role-pill { margin-top: var(--space-xs); }
 
 /* ============================================================
    GRILLE D'INFORMATIONS

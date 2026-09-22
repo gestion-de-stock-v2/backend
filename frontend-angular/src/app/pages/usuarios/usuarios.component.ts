@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { switchMap } from 'rxjs';
 import { Role, User } from '../../models/user.model';
+import { ALL_ROLES, ROLE_COLORS, ROLE_ICONS } from '../../models/role-style';
 import { IconComponent } from '../../components/icon/icon.component';
 import { AuthService } from '../../services/auth.service';
 
@@ -31,17 +32,11 @@ export class UsuariosComponent implements OnInit {
   private readonly registerUrl = '/api/v1/auth/register';
 
   users: User[] = [];
-  roles: Role[] = ['ADMIN', 'GERANT', 'MAGASINIER', 'VENDEUR', 'ACHETEUR', 'COMPTABLE', 'OBSERVATEUR'];
+  roles: Role[] = ALL_ROLES;
 
-  roleIcons: Record<Role, string> = {
-    ADMIN: 'crown', GERANT: 'briefcase', MAGASINIER: 'package', VENDEUR: 'cart',
-    ACHETEUR: 'shoppingBag', COMPTABLE: 'chart', OBSERVATEUR: 'eye',
-  };
+  roleIcons = ROLE_ICONS;
 
-  roleColors: Record<Role, string> = {
-    ADMIN: '#dc2626', GERANT: '#2563eb', MAGASINIER: '#d97706', VENDEUR: '#16a34a',
-    ACHETEUR: '#4f46e5', COMPTABLE: '#9333ea', OBSERVATEUR: '#64748b',
-  };
+  roleColors = ROLE_COLORS;
 
   showForm = false;
   loading = false;
