@@ -194,6 +194,14 @@ migration `V<n>__description.sql` ; ne modifiez jamais une migration déjà appl
 
 ## Points connus
 
+- **La sécurité repose sur la passerelle seule.** `stock-service`, `order-service`,
+  `customer-service` et `payment-service` ne portent pas de chaîne de sécurité :
+  ils font confiance à `X-User-Role`, que seule la passerelle est censée écrire.
+  Un attaquant ayant pied sur le réseau Docker interne pourrait donc les appeler
+  directement. Tant que seul le port `8222` est exposé, la surface reste fermée
+  de l'extérieur, mais une défense en profondeur (validation du jeton dans chaque
+  service, ou mTLS) reste à ajouter.
+
 - **Couverture de tests partielle.** Les chemins critiques (authentification,
   concurrence sur le stock, saga) sont couverts, mais il n'existe pas encore de
   tests d'intégration bout en bout avec bases et Kafka réels.
