@@ -22,8 +22,14 @@ INSERT INTO product (id, name, description, available_quantity, price, version, 
  (6, 'SSD Samsung 1 To',     'NVMe PCIe 4.0',                        60,  95000.00, 0, 4, 3),
  (7, 'Cle USB 128 Go',       'USB 3.2, boitier metal',              150,  12500.00, 0, 4, 3);
 
--- Repositionner les sequences au-dela des identifiants inseres manuellement
-ALTER SEQUENCE category_seq       RESTART WITH 51;
-ALTER SEQUENCE supplier_seq       RESTART WITH 51;
-ALTER SEQUENCE product_seq        RESTART WITH 51;
-ALTER SEQUENCE stock_movement_seq RESTART WITH 51;
+-- Repositionner les sequences bien au-dela des identifiants inseres ci-dessus.
+--
+-- Les sequences avancent de 50 et Hibernate utilise l'optimiseur "pooled" : la
+-- valeur rendue par nextval est la BORNE HAUTE du bloc alloue, pas sa borne
+-- basse. Repartir a 51 aurait donc distribue les identifiants 2 a 51, en
+-- collision directe avec les lignes de demonstration ci-dessus. 1000 laisse une
+-- marge sans ambiguite.
+ALTER SEQUENCE category_seq       RESTART WITH 1000;
+ALTER SEQUENCE supplier_seq       RESTART WITH 1000;
+ALTER SEQUENCE product_seq        RESTART WITH 1000;
+ALTER SEQUENCE stock_movement_seq RESTART WITH 1000;

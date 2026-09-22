@@ -153,6 +153,15 @@ services:
     environment:
       <<: *service-env
       SERVER_PORT: 8888
+      # Selon la configuration, le serveur peut resoudre les placeholders des
+      # fichiers qu'il sert avant de les renvoyer. Il lui faut donc les memes
+      # variables que ses clients, sans quoi gateway-service.yml et
+      # auth-service.yml partiraient avec un ${JWT_SECRET} non resolu.
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@gestionstock.local}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
     # Volontairement non expose sur la machine hote : ce service sert les
     # identifiants de toutes les bases de donnees.
     healthcheck: *spring-healthcheck
