@@ -1,6 +1,0 @@
-/* ============================================================
-   PAIEMENTS
-   Le service n'expose qu'une création : la page se limite au
-   formulaire, sans liste à afficher.
-   ============================================================ */
-.payments-page .form-card { max-width: 720px; }

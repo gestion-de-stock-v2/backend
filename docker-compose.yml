@@ -331,9 +331,16 @@ services:
   # FRONTEND
   # ============================================================
 
+  # Le frontend vit dans son propre depot :
+  #   https://github.com/gestion-de-stock-v2/frontend-angular
+  #
+  # Il est place derriere le profil "frontend" pour que la pile backend demarre
+  # seule sans rien exiger. Clonez le depot frontend A COTE de celui-ci, puis :
+  #   docker compose --profile frontend up
   frontend:
+    profiles: [frontend]
     build:
-      context: ./frontend-angular
+      context: ../frontend-angular
     container_name: gs_frontend
     depends_on:
       gateway:

@@ -26,6 +26,13 @@ logs/
 *.iml
 .claude/
 
+# ===== Verrous LibreOffice =====
+.~lock.*#
+
 # ===== OS =====
 .DS_Store
 Thumbs.db
+
+# Le frontend vit dans son propre depot, clone a cote de celui-ci :
+# https://github.com/gestion-de-stock-v2/frontend-angular
+/frontend-angular/

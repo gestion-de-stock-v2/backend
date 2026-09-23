@@ -1,8 +1,11 @@
 # Gestion de stock — plateforme microservices
 
-Application de gestion de stock : catalogue produits, catégories, fournisseurs,
-mouvements de stock, clients, commandes, paiements et notifications par e-mail.
-Architecture Spring Cloud, frontend Angular, authentification JWT avec 7 rôles.
+Backend de la plateforme de gestion de stock : catalogue produits, catégories,
+fournisseurs, mouvements, clients, commandes, paiements et notifications par
+e-mail. Architecture Spring Cloud, authentification JWT avec 7 rôles.
+
+L'interface Angular vit dans un dépôt distinct :
+[`gestion-de-stock-v2/frontend-angular`](https://github.com/gestion-de-stock-v2/frontend-angular).
 
 ---
 
@@ -16,9 +19,25 @@ docker compose up --build
 Au premier lancement, comptez quelques minutes : les neuf services sont compilés
 puis démarrés dans l'ordre imposé par leurs `healthcheck`.
 
+### Avec l'interface
+
+Le frontend étant dans un dépôt séparé, clonez-le **à côté** de celui-ci :
+
+```
+un-dossier/
+├── backend/            ← ce dépôt
+└── frontend-angular/   ← https://github.com/gestion-de-stock-v2/frontend-angular
+```
+
+```bash
+docker compose --profile frontend up --build    # ajoute l'interface sur :4200
+```
+
+Sans ce profil, la pile backend démarre seule : elle n'a besoin de rien d'autre.
+
 | Accès | URL |
 |---|---|
-| **Application** | http://localhost:4200 |
+| **Application** (profil `frontend`) | http://localhost:4200 |
 | Passerelle API | http://localhost:8222 |
 | Registre Eureka | http://localhost:8761 |
 | Traces Zipkin | http://localhost:9411 |
@@ -171,8 +190,8 @@ mvn -pl services/discovery     spring-boot:run
 mvn -pl services/gateway       spring-boot:run
 # ... puis les services métier
 
-# Frontend
-cd frontend-angular && npm ci && npm start     # proxy vers la passerelle :8222
+# Frontend : voir le depot frontend-angular, clone a cote
+cd ../frontend-angular && npm ci && npm start  # proxy vers la passerelle :8222
 ```
 
 ### Tests
