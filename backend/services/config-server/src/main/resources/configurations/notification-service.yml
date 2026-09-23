@@ -1,0 +1,46 @@
+server:
+  port: 8040
+
+spring:
+  data:
+    mongodb:
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      database: notification
+      username: ${MONGO_USERNAME}
+      password: ${MONGO_PASSWORD}
+      authentication-database: admin
+  kafka:
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      group-id: notificationGroup
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        # Etait '*' : le consommateur acceptait de desserialiser n'importe quelle classe
+        # presente au classpath a partir d'un message Kafka. Restreint au domaine applicatif.
+        spring.json.trusted.packages: com.gestionstock.*
+        # Une seule ligne, sans espace apres les virgules : Spring decoupe cette
+        # chaine sur ',' puis ':' et un espace de tete rendrait le nom de classe
+        # introuvable. Un scalaire YAML replie en inserait.
+        spring.json.type.mapping: "orderConfirmation:com.gestionstock.notification.kafka.order.OrderConfirmation,paymentConfirmation:com.gestionstock.notification.kafka.payment.PaymentConfirmation,passwordReset:com.gestionstock.notification.kafka.auth.PasswordResetNotification"
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          trust: "*"
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:false}
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+
+application:
+  frontend-url: ${FRONTEND_URL:http://localhost:4200}
+  mail-from: ${MAIL_FROM:no-reply@gestionstock.local}

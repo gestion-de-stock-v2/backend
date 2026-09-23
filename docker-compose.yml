@@ -1,0 +1,394 @@
+# ============================================================
+# Gestion de stock - pile complete
+#   cp .env.example .env && docker compose up --build
+# Outils d'administration optionnels :
+#   docker compose --profile tools up -d
+# ============================================================
+
+# Variables communes a tous les services Spring Boot.
+x-service-env: &service-env
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+  CONFIG_SERVER_URL: http://config-server:8888
+  EUREKA_SERVER_URL: http://discovery:8761/eureka
+  ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+  POSTGRES_HOST: postgresql
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  MONGO_HOST: mongodb
+  MONGO_PORT: 27017
+  MONGO_USERNAME: ${MONGO_USERNAME}
+  MONGO_PASSWORD: ${MONGO_PASSWORD}
+  KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  MAIL_HOST: mail-dev
+  MAIL_PORT: 1025
+  FRONTEND_URL: http://localhost:4200
+
+x-healthcheck: &spring-healthcheck
+  # CMD-SHELL et non CMD : la forme exec ne passe pas par un shell, la variable
+  # $SERVER_PORT ne serait alors jamais substituee et curl recevrait l'URL litterale.
+  test: ["CMD-SHELL", "curl -fsS http://localhost:$${SERVER_PORT}/actuator/health || exit 1"]
+  interval: 10s
+  timeout: 5s
+  retries: 30
+  start_period: 40s
+
+services:
+
+  # ============================================================
+  # INFRASTRUCTURE
+  # ============================================================
+
+  postgresql:
+    image: postgres:16-alpine
+    container_name: gs_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Cree une base par service au tout premier demarrage
+      - ./docker/postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [gs-net]
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7
+    container_name: gs_mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [gs-net]
+    restart: unless-stopped
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: gs_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      # Sans cette liste blanche, la sonde 'ruok' du healthcheck ci-dessous est
+      # refusee par le serveur ("ruok is not executed because it is not in the
+      # whitelist") et le conteneur reste indefiniment unhealthy.
+      ZOOKEEPER_4LW_COMMANDS_WHITELIST: "ruok,srvr,stat"
+    healthcheck:
+      # Simple test TCP : la sonde applicative 'ruok' depend de la liste blanche
+      # 4lw, que cette image n'applique pas de maniere fiable. Verifier que le
+      # port accepte les connexions suffit a ordonner le demarrage de Kafka.
+      test: ["CMD-SHELL", "nc -z localhost 2181 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [gs-net]
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: gs_kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      # Port dedie aux clients tournant sur la machine hote
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # Deux listeners distincts : les conteneurs joignent kafka:9092 sur le reseau
+      # docker, la machine hote passe par localhost:29092. Une annonce unique sur
+      # localhost:9092 rendait le broker injoignable depuis les autres conteneurs.
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    networks: [gs-net]
+    restart: unless-stopped
+
+  zipkin:
+    image: openzipkin/zipkin:3
+    container_name: gs_zipkin
+    ports:
+      - "9411:9411"
+    networks: [gs-net]
+    restart: unless-stopped
+
+  mail-dev:
+    image: maildev/maildev:2.1.0
+    container_name: gs_maildev
+    ports:
+      - "1080:1080"   # interface web : les e-mails envoyes y sont consultables
+      - "1025:1025"   # SMTP
+    networks: [gs-net]
+    restart: unless-stopped
+
+  # ============================================================
+  # SOCLE SPRING CLOUD
+  # ============================================================
+
+  config-server:
+    build:
+      context: ./backend
+      args: { SERVICE: config-server }
+    container_name: gs_config_server
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8888
+      # Doit rester "native" : ce profil indique au serveur de lire les fichiers de
+      # configurations/ depuis le classpath. L'ancre commune propage SPRING_PROFILES_ACTIVE
+      # (valeur "dev" par defaut), ce qui ecrasait ce profil et faisait basculer le
+      # serveur sur son backend Git par defaut -- il refusait alors de demarrer,
+      # faute d'URI de depot.
+      SPRING_PROFILES_ACTIVE: native
+      # Selon la configuration, le serveur peut resoudre les placeholders des
+      # fichiers qu'il sert avant de les renvoyer. Il lui faut donc les memes
+      # variables que ses clients, sans quoi gateway-service.yml et
+      # auth-service.yml partiraient avec un ${JWT_SECRET} non resolu.
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@gestionstock.local}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
+    # Volontairement non expose sur la machine hote : ce service sert les
+    # identifiants de toutes les bases de donnees.
+    healthcheck: *spring-healthcheck
+    networks: [gs-net]
+    restart: unless-stopped
+
+  discovery:
+    build:
+      context: ./backend
+      args: { SERVICE: discovery }
+    container_name: gs_discovery
+    depends_on:
+      config-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8761
+      EUREKA_INSTANCE_HOSTNAME: discovery
+    ports:
+      - "8761:8761"
+    healthcheck: *spring-healthcheck
+    networks: [gs-net]
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: ./backend
+      args: { SERVICE: gateway }
+    container_name: gs_gateway
+    depends_on:
+      discovery:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8222
+      EUREKA_INSTANCE_HOSTNAME: gateway
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8222:8222"
+    healthcheck: *spring-healthcheck
+    networks: [gs-net]
+    restart: unless-stopped
+
+  # ============================================================
+  # SERVICES METIER
+  # ============================================================
+
+  auth-service:
+    build:
+      context: ./backend
+      args: { SERVICE: auth-service }
+    container_name: gs_auth
+    depends_on:
+      discovery:   { condition: service_healthy }
+      postgresql:  { condition: service_healthy }
+      kafka:       { condition: service_healthy }
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8085
+      EUREKA_INSTANCE_HOSTNAME: auth-service
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@gestionstock.local}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
+    healthcheck: *spring-healthcheck
+    networks: [gs-net]
+    restart: unless-stopped
+
+  stock-service:
+    build:
+      context: ./backend
+      args: { SERVICE: stock-service }
+    container_name: gs_stock
+    depends_on:
+      discovery:  { condition: service_healthy }
+      postgresql: { condition: service_healthy }
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8050
+      EUREKA_INSTANCE_HOSTNAME: stock-service
+    healthcheck: *spring-healthcheck
+    networks: [gs-net]
+    restart: unless-stopped
+
+  customer-service:
+    build:
+      context: ./backend
+      args: { SERVICE: customer-service }
+    container_name: gs_customer
+    depends_on:
+      discovery: { condition: service_healthy }
+      mongodb:   { condition: service_healthy }
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8090
+      EUREKA_INSTANCE_HOSTNAME: customer-service
+    healthcheck: *spring-healthcheck
+    networks: [gs-net]
+    restart: unless-stopped
+
+  order-service:
+    build:
+      context: ./backend
+      args: { SERVICE: order-service }
+    container_name: gs_order
+    depends_on:
+      discovery:  { condition: service_healthy }
+      postgresql: { condition: service_healthy }
+      kafka:      { condition: service_healthy }
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8070
+      EUREKA_INSTANCE_HOSTNAME: order-service
+    healthcheck: *spring-healthcheck
+    networks: [gs-net]
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: ./backend
+      args: { SERVICE: payment-service }
+    container_name: gs_payment
+    depends_on:
+      discovery:  { condition: service_healthy }
+      postgresql: { condition: service_healthy }
+      kafka:      { condition: service_healthy }
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8060
+      EUREKA_INSTANCE_HOSTNAME: payment-service
+    healthcheck: *spring-healthcheck
+    networks: [gs-net]
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ./backend
+      args: { SERVICE: notification-service }
+    container_name: gs_notification
+    depends_on:
+      discovery: { condition: service_healthy }
+      mongodb:   { condition: service_healthy }
+      kafka:     { condition: service_healthy }
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8040
+      EUREKA_INSTANCE_HOSTNAME: notification-service
+    healthcheck: *spring-healthcheck
+    networks: [gs-net]
+    restart: unless-stopped
+
+  # ============================================================
+  # FRONTEND
+  # ============================================================
+
+  # Le frontend vit dans son propre depot :
+  #   https://github.com/gestion-de-stock-v2/frontend-angular
+  #
+  # Il est place derriere le profil "frontend" pour que la pile backend demarre
+  # seule sans rien exiger. Clonez le depot frontend A COTE de celui-ci, puis :
+  #   docker compose --profile frontend up
+  frontend:
+    profiles: [frontend]
+    build:
+      context: ../frontend-angular
+    container_name: gs_frontend
+    depends_on:
+      gateway:
+        condition: service_healthy
+    ports:
+      # Port hote parametrable : 4200 est souvent deja pris par un `ng serve` local.
+      - "${FRONTEND_HOST_PORT:-4200}:80"
+    networks: [gs-net]
+    restart: unless-stopped
+
+  # ============================================================
+  # OUTILS D'ADMINISTRATION (profil "tools")
+  # ============================================================
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: gs_pgadmin
+    profiles: [tools]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@gestionstock.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks: [gs-net]
+
+  mongo-express:
+    image: mongo-express:1
+    container_name: gs_mongo_express
+    profiles: [tools]
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    ports:
+      - "8081:8081"
+    networks: [gs-net]
+
+networks:
+  gs-net:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  mongo-data:
+  pgadmin-data:

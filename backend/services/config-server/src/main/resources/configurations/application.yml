@@ -1,0 +1,35 @@
+# ============================================================
+# Configuration commune a tous les services
+# ============================================================
+eureka:
+  instance:
+    # En conteneur, s'enregistrer par le nom d'hote docker plutot que par localhost.
+    prefer-ip-address: ${EUREKA_PREFER_IP:false}
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
+
+spring:
+  cloud:
+    config:
+      override-system-properties: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # Surface volontairement minimale : les healthcheck docker-compose ont besoin
+        # de /health, rien de plus n'est expose.
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING:1.0}
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://localhost:9411/api/v2/spans}

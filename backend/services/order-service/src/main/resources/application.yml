@@ -1,0 +1,8 @@
+spring:
+  config:
+    # L'import n'est PAS marque optional : sans sa configuration centralisee un
+    # service demarrerait quand meme, mais vide -- la passerelle sans aucune route,
+    # les services metier sans source de donnees. Mieux vaut un echec bruyant.
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  application:
+    name: order-service

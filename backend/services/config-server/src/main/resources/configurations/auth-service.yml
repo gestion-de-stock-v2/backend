@@ -1,0 +1,38 @@
+server:
+  port: 8085
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/auth
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      # Le schema est la propriete de Flyway : Hibernate se contente de le verifier.
+      ddl-auto: validate
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: passwordReset:com.gestionstock.auth.kafka.PasswordResetNotification
+
+# Aucune valeur par defaut pour le secret : l'application refuse de demarrer sans lui,
+# ce qui evite qu'une cle de developpement se retrouve en production.
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+application:
+  frontend-url: ${FRONTEND_URL:http://localhost:4200}
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    email: ${ADMIN_EMAIL:admin@gestionstock.local}
+    initial-password: ${ADMIN_INITIAL_PASSWORD:}
